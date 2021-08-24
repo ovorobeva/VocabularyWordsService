@@ -1,0 +1,8 @@
+version: "3"
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      WORDS_API_KEY: 55k0ykdy6pe8fmu69pwjk94es02i9085k3h1hn11ku56c4qep
