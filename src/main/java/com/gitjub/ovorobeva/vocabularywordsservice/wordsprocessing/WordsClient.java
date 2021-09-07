@@ -3,12 +3,20 @@ package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 import com.gitjub.ovorobeva.vocabularywordsservice.dto.partsofspeech.PartsOfSpeech;
 import com.gitjub.ovorobeva.vocabularywordsservice.dto.words.WordsMessage;
 import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
-import retrofit2.Call;
-import retrofit2.Response;
+import com.google.gson.Gson;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +28,7 @@ public class WordsClient {
     private static final String TAG = "Custom logs";
     public static Logger logger = Logger.getLogger(TAG);
     private static WordsClient wordsClient;
-    private final String BASE_URL = "https://api.wordnik.com/v4/";
+    private final String BASE_URL = "https://api.wordnik.com/v4/words.json/";
     private final String WORDS_API_KEY = getenv.get("WORDS_API_KEY");
     private final WordsApi wordsApi;
 
@@ -48,81 +56,81 @@ public class WordsClient {
         int returnedWords = 0;
         List<String> words = new LinkedList<>();
 
-        Map<String, String> apiVariables = new HashMap<>();
-        apiVariables.put("minCorpusCount", "10000");
-        apiVariables.put("maxCorpusCount", "-1");
-        apiVariables.put("minDictionaryCount", "1");
-        apiVariables.put("maxDictionaryCount", "-1");
-        apiVariables.put("minLength", "2");
-        apiVariables.put("maxLength", "-1");
 
         List<String> includePartOfSpeechList = new ArrayList<>();
-        includePartOfSpeechList.add("noun,");
-        includePartOfSpeechList.add("adjective,");
-        includePartOfSpeechList.add("verb,");
-        includePartOfSpeechList.add("idiom,");
+        includePartOfSpeechList.add("noun");
+        includePartOfSpeechList.add("adjective");
+        includePartOfSpeechList.add("verb");
+        includePartOfSpeechList.add("idiom");
         includePartOfSpeechList.add("past-participle");
 
-        StringBuilder includePartOfSpeech = new StringBuilder();
-
-        for (String partOfSpeech : includePartOfSpeechList) {
-            includePartOfSpeech.append(partOfSpeech);
-        }
 
         List<String> excludePartOfSpeechList = new ArrayList<>();
-        excludePartOfSpeechList.add("interjection,");
-        excludePartOfSpeechList.add("pronoun,");
-        excludePartOfSpeechList.add("preposition,");
-        excludePartOfSpeechList.add("abbreviation,");
-        excludePartOfSpeechList.add("affix,");
-        excludePartOfSpeechList.add("article,");
-        excludePartOfSpeechList.add("auxiliary-verb,");
-        excludePartOfSpeechList.add("conjunction,");
-        excludePartOfSpeechList.add("definite-article,");
-        excludePartOfSpeechList.add("family-name,");
-        excludePartOfSpeechList.add("given-name,");
-        excludePartOfSpeechList.add("imperative,");
-        excludePartOfSpeechList.add("proper-noun,");
-        excludePartOfSpeechList.add("proper-noun-plural,");
-        excludePartOfSpeechList.add("suffix,");
+        excludePartOfSpeechList.add("interjection");
+        excludePartOfSpeechList.add("pronoun");
+        excludePartOfSpeechList.add("preposition");
+        excludePartOfSpeechList.add("abbreviation");
+        excludePartOfSpeechList.add("affix");
+        excludePartOfSpeechList.add("article");
+        excludePartOfSpeechList.add("auxiliary-verb");
+        excludePartOfSpeechList.add("conjunction");
+        excludePartOfSpeechList.add("definite-article");
+        excludePartOfSpeechList.add("family-name");
+        excludePartOfSpeechList.add("given-name");
+        excludePartOfSpeechList.add("imperative");
+        excludePartOfSpeechList.add("proper-noun");
+        excludePartOfSpeechList.add("proper-noun-plural");
+        excludePartOfSpeechList.add("suffix");
         excludePartOfSpeechList.add("verb-intransitive,");
         excludePartOfSpeechList.add("verb-transitive");
 
 
-        StringBuilder excludePartOfSpeech = new StringBuilder();
+        MultiValueMap<String, String> apiVariables = new LinkedMultiValueMap<>();
+        apiVariables.put("minCorpusCount", Collections.singletonList("10000"));
+        apiVariables.put("maxCorpusCount", Collections.singletonList("-1"));
+        apiVariables.put("minDictionaryCount", Collections.singletonList("1"));
+        apiVariables.put("maxDictionaryCount", Collections.singletonList("-1"));
+        apiVariables.put("minLength", Collections.singletonList("2"));
+        apiVariables.put("maxLength", Collections.singletonList("-1"));
+        apiVariables.put("includePartOfSpeech[]", includePartOfSpeechList);
+        apiVariables.put("excludePartOfSpeech[]", excludePartOfSpeechList);
 
-        for (String partOfSpeech : excludePartOfSpeechList) {
-            excludePartOfSpeech.append(partOfSpeech);
-        }
+        URI uri = new DefaultUriBuilderFactory(BASE_URL).builder().pathSegment("randomWords")
+                .queryParams(apiVariables)
+                .queryParam("limit", wordsCount)
+                .queryParam("api_key", WORDS_API_KEY)
+                .build();
 
-        Call<List<WordsMessage>> randomWordsRequest = wordsApi.sendRequest(true, includePartOfSpeech.toString(), excludePartOfSpeech.toString(), apiVariables.get("minCorpusCount"),
-                apiVariables.get("maxCorpusCount"), apiVariables.get("minDictionaryCount"), apiVariables.get("maxDictionaryCount"),
-                apiVariables.get("minLength"), apiVariables.get("maxLength"), String.valueOf(wordsCount), WORDS_API_KEY);
-
-
+        HttpClient client = HttpClient.newBuilder()
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .build();
+        Gson converter = new Gson();
         try {
-            Response<List<WordsMessage>> response = randomWordsRequest.execute();
-            if (response.isSuccessful()) {
-                List<WordsMessage> responseBody = response.body();
-                assert responseBody != null;
-                for (WordsMessage responseItem : responseBody) {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                JSONArray jsonArray = new JSONArray(response.body());
+                for (Object object : jsonArray) {
+                    JSONObject jsonObject = (JSONObject) object;
                     returnedWords++;
-                    words.add(responseItem.getWord());
-                    WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.raw().request().url());
-                    WordsClient.logger.log(Level.INFO, "execute. Response to process is: " + responseBody);
+                    words.add(converter.fromJson(String.valueOf(jsonObject), WordsMessage.class).getWord());
+                    WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.uri());
+                    WordsClient.logger.log(Level.INFO, "execute. Response to process is: " + words);
                 }
-            } else if (response.code() == 429) {
+            } else if (response.statusCode() == 429) {
                 throw new TooManyRequestsException();
             } else
-                words.add("There is an error during request by link " + response.raw().request().url() + " . Error code is: " + response.code());
+                words.add("There is an error during request by link " + request.uri() + " . Error code is: " + response.statusCode());
+
         } catch (IOException e) {
-            words.add("Something went wrong. Error is: " + e.getMessage());
             e.printStackTrace();
         } catch (TooManyRequestsException e) {
             Thread.sleep(10000);
             e.printStackTrace();
             if ((wordsCount - returnedWords) > 0)
-            return getRandomWords(wordsCount - returnedWords);
+                return getRandomWords(wordsCount - returnedWords);
         }
 
         return words;
@@ -133,12 +141,55 @@ public class WordsClient {
 
         WordsClient.logger.log(Level.INFO, "getPartsOfSpeech: Start getting parts of speech for the word " + word);
         final String LIMIT = "500";
-        Map<String, Boolean> apiVariables = new HashMap<>();
-        apiVariables.put("includeRelated", false);
-        apiVariables.put("useCanonical", false);
-        apiVariables.put("includeTags", false);
+        MultiValueMap<String, String> apiVariables = new LinkedMultiValueMap<>();
+        apiVariables.put("includeRelated", Collections.singletonList("false"));
+        apiVariables.put("useCanonical", Collections.singletonList("false"));
+        apiVariables.put("includeTags", Collections.singletonList("false"));
+        apiVariables.put("api_key", Collections.singletonList(WORDS_API_KEY));
+        apiVariables.put("limit", Collections.singletonList(LIMIT));
+
+        URI uri = new DefaultUriBuilderFactory(BASE_URL).builder().pathSegment(word).pathSegment("definitions")
+                .queryParams(apiVariables)
+                .build();
+
+        HttpClient client = HttpClient.newBuilder()
+                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .build();
+        Gson converter = new Gson();
 
 
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                JSONArray jsonArray = new JSONArray(response.body());
+                for (Object object : jsonArray) {
+                    JSONObject jsonObject = (JSONObject) object;
+                    partsOfSpeech.add(converter.fromJson(String.valueOf(jsonObject), PartsOfSpeech.class).getPartOfSpeech());
+                }
+                WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.uri());
+                WordsClient.logger.log(Level.INFO, "execute. Response to process is: " + partsOfSpeech);
+            } else if (response.statusCode() == 429) {
+                throw new TooManyRequestsException();
+            } else if (response.statusCode() == 404) {
+                partsOfSpeech = null;
+            } else
+                WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.uri() + " . Error code is: " + response.statusCode());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TooManyRequestsException e) {
+            Thread.sleep(10000);
+            e.printStackTrace();
+            return getPartsOfSpeech(word);
+        }
+
+
+
+
+
+        /*
         Call<List<PartsOfSpeech>> partsOfSpeechRequest = wordsApi.sendRequest(word, apiVariables.get("includeRelated"),
                 apiVariables.get("useCanonical"), apiVariables.get("includeTags"), LIMIT, WORDS_API_KEY);
 
@@ -167,7 +218,7 @@ public class WordsClient {
             Thread.sleep(10000);
             e.printStackTrace();
             return getPartsOfSpeech(word);
-        }
+        }*/
         return partsOfSpeech;
     }
 
