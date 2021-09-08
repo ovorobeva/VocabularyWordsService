@@ -13,11 +13,11 @@ public class PartsOfSpeech {
     private String id;
     @Nullable
     private String partOfSpeech;
-    private String attributionText;
-    private String sourceDictionary;
-    private String text;
-    private String sequence;
-    private Integer score;
+    private Object attributionText;
+    private Object sourceDictionary;
+    private Object text;
+    private Object sequence;
+    private Object score;
     private List<Label> labels = null;
     private List<Citation> citations = null;
     private String word;
@@ -25,9 +25,9 @@ public class PartsOfSpeech {
     private List<ExampleUse> exampleUses = null;
     private List<Object> textProns = null;
     private List<Object> notes = null;
-    private String attributionUrl;
-    private String wordnikUrl;
-    private Map<String, Object> additionalProperties = new HashMap<>();
+    private Object attributionUrl;
+    private Object wordnikUrl;
+    private Map<Object, Object> additionalProperties = new HashMap<>();
 
     @Override
     public String toString() {

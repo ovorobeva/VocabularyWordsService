@@ -30,7 +30,7 @@ public class WordsProcessing {
         }
 
         for (String partOfSpeech : partsOfSpeech) {
-            if (!partOfSpeech.matches("(?i)noun|adjective|transitive & intransitive verb|transitive verb|intransitive verb|verb|adverb|idiom|past-participle") || partOfSpeech.isEmpty()) {
+            if (!partOfSpeech.matches("(?i)noun|phrasal verb|adverb & adjective|adjective|transitive & intransitive verb|transitive verb|intransitive verb|verb|adverb|idiom|past-participle") || partOfSpeech.isEmpty()) {
                 WordsClient.logger.log(Level.INFO, "isPartOfSpeechCorrect: The word " + word + " is to be removed because of part of speech: " + partOfSpeech);
                 isCorrect = false;
                 break;
@@ -39,22 +39,6 @@ public class WordsProcessing {
         return isCorrect;
     }
 
-/*    private static List<String> processResponse(String entity, JSONArray response) {
-        List<String> responseList = new LinkedList<>();
-        try {
-            //   JSONArray jsonResponse = new JSONArray(response);
-            int wordsCount = response.length();
-            for (int i = 0; i < wordsCount; i++) {
-                responseList.add(response.getJSONObject(i).getString(entity));
-            }
-            WordsClient.logger.log(Level.INFO, "processResponse: response processed");
-        } catch (JSONException e) {
-            e.printStackTrace();
-            WordsClient.logger.log(Level.SEVERE, "processResponse: Cannot parse response.Response is: " + response + " Error message is: " + e);
-        }
-        WordsClient.logger.log(Level.INFO, "processResponse: processed result is: " + responseList);
-        return responseList;
-    }*/
 
     public List<GeneratedWords> getWords() throws InterruptedException {
 
