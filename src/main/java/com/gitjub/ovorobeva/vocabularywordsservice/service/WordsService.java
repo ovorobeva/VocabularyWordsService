@@ -14,11 +14,13 @@ import java.util.List;
 public class WordsService {
     @Autowired
     Translation translation;
+    @Autowired
+    WordsProcessing wordsProcessing;
 
     private int wordsCount;
 
     public List<GeneratedWords> getWordList() {
-        WordsProcessing wordsProcessing = new WordsProcessing(wordsCount);
+        wordsProcessing.setWordsCount(wordsCount);
         return translation.getTranslates(wordsProcessing);
     }
 

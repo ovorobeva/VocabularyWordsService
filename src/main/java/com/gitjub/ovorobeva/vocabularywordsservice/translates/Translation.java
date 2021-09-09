@@ -16,12 +16,10 @@ public class Translation {
     TranslateClient translateClient;
 
     public List<GeneratedWords> getTranslates(WordsProcessing wordsProcessing) {
-        List<GeneratedWords> wordList;
-  //      TranslateClient translateClient = TranslateClient.getTranslateClient();
+        List<GeneratedWords> wordList = new LinkedList<>();
         try {
-            wordList = new LinkedList<>(wordsProcessing.getWords());
+            wordsProcessing.getWords(wordList);
         } catch (InterruptedException e) {
-            wordList = new LinkedList<>();
             e.printStackTrace();
         }
 

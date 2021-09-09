@@ -5,11 +5,10 @@ import com.gitjub.ovorobeva.vocabularywordsservice.dto.words.WordsMessage;
 import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.google.gson.Gson;
 import org.json.JSONArray;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,35 +19,16 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Service
 public class WordsClient {
 
     private static final Map<String, String> getenv = System.getenv();
-    private static final Object OBJECT = new Object();
     private static final String TAG = "Custom logs";
     public static Logger logger = Logger.getLogger(TAG);
-    private static WordsClient wordsClient;
     private final String BASE_URL = "https://api.wordnik.com/v4/";
     private final String WORDS_API_KEY = getenv.get("WORDS_API_KEY");
-    private final WordsApi wordsApi;
 
-    private WordsClient() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build();
-        wordsApi = retrofit.create(WordsApi.class);
-    }
-
-    public static WordsClient getWordsClient() {
-        if (wordsClient != null)
-            return wordsClient;
-
-        synchronized (OBJECT) {
-            if (wordsClient == null)
-                wordsClient = new WordsClient();
-            return wordsClient;
-        }
-    }
+    public WordsClient() {    }
 
     public List<String> getRandomWords(int wordsCount) throws InterruptedException {
 
@@ -167,8 +147,6 @@ public class WordsClient {
                 JSONArray jsonMessages = new JSONArray(response.body());
                 if (jsonMessages.isEmpty()) return null;
                 for (Object message : jsonMessages) {
-                    WordsClient.logger.log(Level.INFO, "execute. item is: " + message);
-
                     String partOfSpeech = converter.fromJson(message.toString(), PartsOfSpeech.class).getPartOfSpeech();
                         if (partOfSpeech != null && !partOfSpeech.isEmpty()) {
                         partsOfSpeech.add(partOfSpeech.toLowerCase());

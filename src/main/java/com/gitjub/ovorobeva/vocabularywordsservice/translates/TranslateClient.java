@@ -1,15 +1,19 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.translates;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitjub.ovorobeva.vocabularywordsservice.dto.generated.GeneratedWords;
 import com.gitjub.ovorobeva.vocabularywordsservice.dto.translation.Translate;
 import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
+import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -22,38 +26,54 @@ public class TranslateClient {
     public static Logger logger = Logger.getLogger(TAG);
     private final String BASE_URL = "https://cloud.yandex.ru/api/translate/";
 
-    private final TranslateApi translateApi;
-
-    private TranslateClient() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(JacksonConverterFactory.create())
-                .build();
-        translateApi = retrofit.create(TranslateApi.class);
-    }
 
     public String getTranslate(GeneratedWords word) throws InterruptedException {
 
         Map<String, String> apiVariables = new HashMap<>();
         apiVariables.put("sourceLanguageCode", "en");
         apiVariables.put("targetLanguageCode", "ru");
+        apiVariables.put("texts", word.getEn());
 
+        ObjectMapper objectMapper = new ObjectMapper();
 
-        Call<Translate> translateRequest = translateApi.sendRequest(apiVariables.get("sourceLanguageCode"),
-                apiVariables.get("targetLanguageCode"), word.getEn());
+        URI uri = new DefaultUriBuilderFactory(BASE_URL).builder().pathSegment("translate")
+                .build();
+
+        HttpClient client = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_2)
+
+                .build();
+        String requestBody = null;
+        try {
+            requestBody = objectMapper
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(apiVariables);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+        Gson converter = new Gson();
 
 
         try {
-            Response<Translate> response = translateRequest.execute();
-            TranslateClient.logger.log(Level.INFO, "execute: URL is: " + translateRequest.request().url());
-            if (response.isSuccessful()) {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            TranslateClient.logger.log(Level.INFO, "execute: URL is: " + response.uri());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 assert response.body() != null;
-                word.setRu(response.body().getTranslations().get(0).getText());
+
+                word.setRu(converter.fromJson(response.body(), Translate.class).getTranslations().get(0).getText());
                 TranslateClient.logger.log(Level.INFO, "execute: Translate for the word " + word.getEn() + " is: " + word.getRu());
-            } else if (response.code() == 429) {
+            } else if (response.statusCode() == 429) {
                 throw new TooManyRequestsException();
             } else {
-                TranslateClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.raw().request().url() + " . Error code is: " + response.code());
+                TranslateClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.uri() +
+                        " . Error code is: " + response.statusCode() +
+                        " Error is: " + response.body());
                 word.setRu("Translation is not found");
             }
         } catch (IOException e) {

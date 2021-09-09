@@ -1,22 +1,22 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.dto.generated.GeneratedWords;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+@Service
+@Data
 public class WordsProcessing {
-    List<GeneratedWords> generatedWordsList = new LinkedList<>();
-    private int id = 0;
-    private int wordsCount;
+    @Autowired
+    WordsClient wordsClient;
 
-    public WordsProcessing(int wordsCount) {
-        this.wordsCount = wordsCount;
-    }
+    private int wordsCount;
 
     private static Boolean isPartOfSpeechCorrect(String word, WordsClient wordsClient) throws InterruptedException {
         WordsClient.logger.log(Level.INFO, "isPartOfSpeechCorrect: the word " + word + " is being checked");
@@ -40,15 +40,14 @@ public class WordsProcessing {
     }
 
 
-    public List<GeneratedWords> getWords() throws InterruptedException {
-
-        WordsClient wordsClient = WordsClient.getWordsClient();
+    public void getWords(List<GeneratedWords> generatedWordsList) throws InterruptedException {
 
         List<String> words = wordsClient.getRandomWords(wordsCount);
 
         Iterator<String> iterator = words.iterator();
         int removedCounter = 0;
 
+        int id = 0;
 
         WordsClient.logger.log(Level.INFO, "getWords: Starting removing non-matching words from the list \n" + words);
 
@@ -71,16 +70,10 @@ public class WordsProcessing {
             generatedWordsList.add(new GeneratedWords(id, word));
             id++;
         }
-        if (removedCounter > 0){
+        if (removedCounter > 0) {
             wordsCount = removedCounter;
-            getWords();
+            getWords(generatedWordsList);
         }
-        WordsClient.logger.log(Level.INFO, "getWords: Words are: " + words);
-
-        return generatedWordsList;
-
     }
-
-
 }
 
