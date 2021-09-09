@@ -16,6 +16,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -141,10 +143,12 @@ public class WordsClient {
         Gson converter = new Gson();
 
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.uri());
-                JSONArray jsonMessages = new JSONArray(response.body());
+            CompletableFuture<HttpResponse<String>> response =
+                client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.get().statusCode() >= 200 && response.get().statusCode() < 300) {
+                WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.get().uri());
+                JSONArray jsonMessages = new JSONArray(response.get().body());
                 if (jsonMessages.isEmpty()) return null;
                 for (Object message : jsonMessages) {
                     String partOfSpeech = converter.fromJson(message.toString(), PartsOfSpeech.class).getPartOfSpeech();
@@ -153,19 +157,19 @@ public class WordsClient {
                     }
                 }
                 WordsClient.logger.log(Level.INFO, "execute. Response to process is: " + partsOfSpeech);
-            } else if (response.statusCode() == 429) {
+            } else if (response.get().statusCode() == 429) {
                 throw new TooManyRequestsException();
-            } else if (response.statusCode() == 404) {
+            } else if (response.get().statusCode() == 404) {
                 partsOfSpeech = null;
             } else
-                WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.uri() + " . Error code is: " + response.statusCode());
+                WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.get().uri() + " . Error code is: " + response.get().statusCode());
         } catch (IllegalStateException e){
             partsOfSpeech = null;
         }catch (TooManyRequestsException e) {
             Thread.sleep(15000);
             e.printStackTrace();
             return getPartsOfSpeech(word);
-        } catch (IOException e) {
+        } catch (ExecutionException e) {
             e.printStackTrace();
             partsOfSpeech = null;
             WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + request.uri() + e.getMessage());
