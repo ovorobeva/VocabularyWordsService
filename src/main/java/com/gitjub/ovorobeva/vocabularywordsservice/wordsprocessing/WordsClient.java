@@ -1,5 +1,6 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 
+import com.gitjub.ovorobeva.vocabularywordsservice.dto.partsofspeech.Meaning;
 import com.gitjub.ovorobeva.vocabularywordsservice.dto.partsofspeech.PartsOfSpeech;
 import com.gitjub.ovorobeva.vocabularywordsservice.dto.words.WordsMessage;
 import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
@@ -27,13 +28,13 @@ public class WordsClient {
     private static final Map<String, String> getenv = System.getenv();
     private static final String TAG = "Custom logs";
     public static Logger logger = Logger.getLogger(TAG);
-    private final String BASE_URL = "https://api.wordnik.com/v4/";
-    private final String WORDS_API_KEY = getenv.get("WORDS_API_KEY");
 
     public WordsClient() {    }
 
     public List<String> getRandomWords(int wordsCount) throws InterruptedException {
 
+        final String BASE_URL = "https://api.wordnik.com/v4/";
+        final String WORDS_API_KEY = getenv.get("WORDS_API_KEY");
         int returnedWords = 0;
         List<String> words = new LinkedList<>();
 
@@ -116,22 +117,15 @@ public class WordsClient {
     }
 
     public List<String> getPartsOfSpeech(String word) throws InterruptedException {
+
+        final String BASE_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+
         WordsClient.logger.log(Level.INFO, "getPartsOfSpeech: Start getting parts of speech for the word " + word);
         List<String> partsOfSpeech = new LinkedList<>();
 
 
-        final String LIMIT = "500";
-        MultiValueMap<String, String> apiVariables = new LinkedMultiValueMap<>();
-        apiVariables.put("includeRelated", Collections.singletonList("false"));
-        apiVariables.put("useCanonical", Collections.singletonList("false"));
-        apiVariables.put("includeTags", Collections.singletonList("false"));
-        apiVariables.put("limit", Collections.singletonList(LIMIT));
-        apiVariables.put("api_key", Collections.singletonList(WORDS_API_KEY));
-
-        URI uri = new DefaultUriBuilderFactory(BASE_URL).builder().pathSegment("word.json")
+        URI uri = new DefaultUriBuilderFactory(BASE_URL).builder()
                 .pathSegment(word)
-                .pathSegment("definitions")
-                .queryParams(apiVariables)
                 .build();
 
         HttpClient client = HttpClient.newBuilder()
@@ -149,9 +143,10 @@ public class WordsClient {
             if (response.get().statusCode() >= 200 && response.get().statusCode() < 300) {
                 WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.get().uri());
                 JSONArray jsonMessages = new JSONArray(response.get().body());
-                if (jsonMessages.isEmpty()) return null;
-                for (Object message : jsonMessages) {
-                    String partOfSpeech = converter.fromJson(message.toString(), PartsOfSpeech.class).getPartOfSpeech();
+                List<Meaning> meanings = converter.fromJson(jsonMessages.get(0).toString(), PartsOfSpeech.class).getMeanings();
+                if (meanings.isEmpty()) return null;
+                for (Meaning message : meanings) {
+                    String partOfSpeech = message.getPartOfSpeech();
                         if (partOfSpeech != null && !partOfSpeech.isEmpty()) {
                         partsOfSpeech.add(partOfSpeech.toLowerCase());
                     }

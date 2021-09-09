@@ -18,7 +18,7 @@ public class Translation {
     public List<GeneratedWords> getTranslates(WordsProcessing wordsProcessing) {
         List<GeneratedWords> wordList = new LinkedList<>();
         try {
-            wordsProcessing.getWords(wordList);
+            wordsProcessing.getWords(wordList, 0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -40,14 +40,12 @@ public class WordsProcessing {
     }
 
 
-    public void getWords(List<GeneratedWords> generatedWordsList) throws InterruptedException {
+    public void getWords(List<GeneratedWords> generatedWordsList, int id) throws InterruptedException {
 
         List<String> words = wordsClient.getRandomWords(wordsCount);
 
         Iterator<String> iterator = words.iterator();
         int removedCounter = 0;
-
-        int id = 0;
 
         WordsClient.logger.log(Level.INFO, "getWords: Starting removing non-matching words from the list \n" + words);
 
@@ -72,7 +70,7 @@ public class WordsProcessing {
         }
         if (removedCounter > 0) {
             wordsCount = removedCounter;
-            getWords(generatedWordsList);
+            getWords(generatedWordsList, id);
         }
     }
 }
