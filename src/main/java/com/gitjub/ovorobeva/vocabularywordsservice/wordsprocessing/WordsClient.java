@@ -29,7 +29,8 @@ public class WordsClient {
     private static final String TAG = "Custom logs";
     public static Logger logger = Logger.getLogger(TAG);
 
-    public WordsClient() {    }
+    public WordsClient() {
+    }
 
     public List<String> getRandomWords(int wordsCount) throws InterruptedException {
 
@@ -138,7 +139,7 @@ public class WordsClient {
 
         try {
             CompletableFuture<HttpResponse<String>> response =
-                client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+                    client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.get().statusCode() >= 200 && response.get().statusCode() < 300) {
                 WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.get().uri());
@@ -147,7 +148,7 @@ public class WordsClient {
                 if (meanings.isEmpty()) return null;
                 for (Meaning message : meanings) {
                     String partOfSpeech = message.getPartOfSpeech();
-                        if (partOfSpeech != null && !partOfSpeech.isEmpty()) {
+                    if (partOfSpeech != null && !partOfSpeech.isEmpty()) {
                         partsOfSpeech.add(partOfSpeech.toLowerCase());
                     }
                 }
@@ -156,11 +157,13 @@ public class WordsClient {
                 throw new TooManyRequestsException();
             } else if (response.get().statusCode() == 404) {
                 partsOfSpeech = null;
+            } else if (response.get().statusCode() == 405) {
+                return getPartsOfSpeech(word);
             } else
                 WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.get().uri() + " . Error code is: " + response.get().statusCode());
-        } catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             partsOfSpeech = null;
-        }catch (TooManyRequestsException e) {
+        } catch (TooManyRequestsException e) {
             Thread.sleep(15000);
             e.printStackTrace();
             return getPartsOfSpeech(word);

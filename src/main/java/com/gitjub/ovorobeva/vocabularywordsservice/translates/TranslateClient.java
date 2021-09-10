@@ -70,6 +70,8 @@ public class TranslateClient {
                 TranslateClient.logger.log(Level.INFO, "execute: Translate for the word " + word.getEn() + " is: " + word.getRu());
             } else if (response.statusCode() == 429) {
                 throw new TooManyRequestsException();
+            } else if (response.statusCode() == 405) {
+                return getTranslate(word);
             } else {
                 TranslateClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.uri() +
                         " . Error code is: " + response.statusCode() +
