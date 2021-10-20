@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.persistence.EntityNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class Controller {
@@ -22,22 +22,13 @@ public class Controller {
 
     @GetMapping("/getwords/{count}")
     public ResponseEntity<List<GeneratedWords>> getWords(@PathVariable int count) {
-        Set<GeneratedWords> generatedWordsSet = new HashSet<>(count);
-        Random random = new Random();
-        System.out.println("count is: " + count);
-        for (byte i = 0; i < count; i++) {
-            int id = random.nextInt((int) (wordsRepository.count() - 1));
-            if (wordsRepository.findById(id).isEmpty())
-                throw new EntityNotFoundException("The blog with ID = " + id + " doesn't exist");
-            GeneratedWords generatedWords = wordsRepository.getById(id);
-            generatedWordsSet.add(generatedWords);
-        }
+        wordsService.setWordsCount(count);
+        List<GeneratedWords> generatedWordList = new ArrayList<>(count);
+        generatedWordList.addAll(wordsService.getWords());
         new Thread(() -> {
             wordsService.setWordsCount(5);
-            wordsService.getWordList();
+            wordsService.fillWordsUp();
         }).start();
-        List<GeneratedWords> generatedWordList = new ArrayList<>(count);
-        generatedWordList.addAll(generatedWordsSet);
         return ResponseEntity.ok().body(generatedWordList);
     }
 }
