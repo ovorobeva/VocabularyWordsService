@@ -1,11 +1,17 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.model.generated;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Entity
 @Table(name = "Generated_words")
 public class GeneratedWords {
@@ -20,9 +26,6 @@ public class GeneratedWords {
     @Column (name = "Russian")
     private String ru;
 
-    public GeneratedWords() {
-    }
-
     public GeneratedWords(String en) {
         this.en = en.toLowerCase();
     }
@@ -34,6 +37,19 @@ public class GeneratedWords {
                 ", en='" + en + '\'' +
                 ", ru='" + ru + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        GeneratedWords that = (GeneratedWords) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
     }
 }
 

@@ -1,6 +1,5 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.controller;
 
-import com.gitjub.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
 import com.gitjub.ovorobeva.vocabularywordsservice.service.WordsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +16,6 @@ public class Controller {
 
     @Autowired
     WordsService wordsService;
-    @Autowired
-    WordsRepository wordsRepository;
 
     @GetMapping("/getwords/{count}")
     public ResponseEntity<List<GeneratedWords>> getWords(@PathVariable int count) {

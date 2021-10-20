@@ -8,6 +8,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.Random;
@@ -16,6 +17,7 @@ import java.util.Set;
 @Service
 @Data
 public class WordsService {
+
     @Autowired
     Translation translation;
     @Autowired
@@ -23,7 +25,7 @@ public class WordsService {
     @Autowired
     WordsRepository wordsRepository;
 
-    private int wordsCount;
+    private int wordsCount = 0;
 
     Set<GeneratedWords> generatedWordsSet = new HashSet<>(wordsCount);
 
@@ -44,7 +46,14 @@ public class WordsService {
         return generatedWordsSet;
     }
 
+    @PostConstruct
     public void fillWordsUp() {
+        System.out.println("COUNT" + wordsCount);
+        if (wordsCount == 0) {
+            if (wordsRepository.count() == 0 )
+                wordsCount = 20;
+            else return;
+        }
         wordsProcessing.setWordsCount(wordsCount);
         wordsRepository.saveAll(translation.getTranslates(wordsProcessing));
     }
