@@ -1,6 +1,6 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 
-import com.gitjub.ovorobeva.vocabularywordsservice.dto.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,7 +65,7 @@ public class WordsProcessing {
                 WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of the wrong part of speech. The count of deleted words is " + removedCounter);
                 continue;
             }
-            generatedWordsList.add(new GeneratedWords(id, word));
+            generatedWordsList.add(new GeneratedWords(word));
             id++;
         }
         if (removedCounter > 0) {

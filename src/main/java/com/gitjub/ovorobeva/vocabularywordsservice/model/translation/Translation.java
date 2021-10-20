@@ -1,4 +1,4 @@
-package com.gitjub.ovorobeva.vocabularywordsservice.dto.translation;
+package com.gitjub.ovorobeva.vocabularywordsservice.model.translation;
 
 import java.util.HashMap;
 import java.util.Map;

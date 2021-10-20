@@ -1,9 +1,9 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 
-import com.gitjub.ovorobeva.vocabularywordsservice.dto.partsofspeech.Meaning;
-import com.gitjub.ovorobeva.vocabularywordsservice.dto.partsofspeech.PartsOfSpeech;
-import com.gitjub.ovorobeva.vocabularywordsservice.dto.words.WordsMessage;
 import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.partsofspeech.Meaning;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.partsofspeech.PartsOfSpeech;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.words.WordsMessage;
 import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.springframework.stereotype.Service;

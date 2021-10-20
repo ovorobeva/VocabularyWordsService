@@ -2,9 +2,9 @@ package com.gitjub.ovorobeva.vocabularywordsservice.translates;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitjub.ovorobeva.vocabularywordsservice.dto.generated.GeneratedWords;
-import com.gitjub.ovorobeva.vocabularywordsservice.dto.translation.Translate;
 import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.translation.Translate;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;

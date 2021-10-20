@@ -1,6 +1,6 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.translates;
 
-import com.gitjub.ovorobeva.vocabularywordsservice.dto.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsClient;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,8 @@ import java.util.logging.Level;
 public class Translation {
     @Autowired
     TranslateClient translateClient;
+    @Autowired
+    WordsProcessing wordsProcessing;
 
     public List<GeneratedWords> getTranslates(WordsProcessing wordsProcessing) {
         List<GeneratedWords> wordList = new LinkedList<>();

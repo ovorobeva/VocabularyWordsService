@@ -1,4 +1,4 @@
-package com.gitjub.ovorobeva.vocabularywordsservice.dto.words;
+package com.gitjub.ovorobeva.vocabularywordsservice.model.words;
 
 import lombok.Data;
 
