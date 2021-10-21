@@ -3,7 +3,6 @@ package com.gitjub.ovorobeva.vocabularywordsservice.model.generated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -13,10 +12,10 @@ import java.util.Objects;
 @Setter
 @RequiredArgsConstructor
 @Entity
-@Table(name = "Generated_words")
+@Table(name = "Generated_words", uniqueConstraints = @UniqueConstraint(columnNames={"English"}))
 public class GeneratedWords {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
     @Column (name = "English")
@@ -42,14 +41,14 @@ public class GeneratedWords {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (!(o instanceof GeneratedWords)) return false;
         GeneratedWords that = (GeneratedWords) o;
-        return id != null && Objects.equals(id, that.id);
+        return getEn().equals(that.getEn()) && getRu().equals(that.getRu());
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(getEn(), getRu());
     }
 }
 
