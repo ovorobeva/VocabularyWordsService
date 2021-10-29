@@ -113,12 +113,14 @@ public class WordsService {
         }
         System.out.println(missingCodes);
 
-        for (int i = 0; i < missingCodes.size(); i++){
-            generatedWordsList.get(i).setCode(missingCodes.get(i));
+        for (int i = 0; i < generatedWordsList.size(); i++){
+            if (i < missingCodes.size())
+                generatedWordsList.get(i).setCode(missingCodes.get(i));
+            else generatedWordsList.get(i).setCode(++max);
         }
-        wordsProcessing.setCode(max + 1);
+/*        wordsProcessing.setCode(max + 1);
         wordsProcessing.setWordsCount(wordsCount - generatedWordsList.size());
-        generatedWordsList.addAll(translation.getTranslates(wordsProcessing));
+        generatedWordsList.addAll(translation.getTranslates(wordsProcessing));*/
         wordsRepository.saveAll(generatedWordsList);
     }
 
