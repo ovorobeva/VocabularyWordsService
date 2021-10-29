@@ -12,6 +12,8 @@ import java.util.logging.Level;
 
 @Component
 public class Translation {
+    public final Object syncObj = new Object();
+
     @Autowired
     TranslateClient translateClient;
     @Autowired
@@ -20,7 +22,7 @@ public class Translation {
     public List<GeneratedWords> getTranslates(WordsProcessing wordsProcessing) {
         List<GeneratedWords> wordList = new LinkedList<>();
         try {
-            wordsProcessing.getWords(wordList, 0);
+            wordsProcessing.getWords(wordList);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -35,6 +37,10 @@ public class Translation {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+       /* synchronized (syncObj){
+            syncObj.notify();
+        }*/
         return wordList;
     }
 }

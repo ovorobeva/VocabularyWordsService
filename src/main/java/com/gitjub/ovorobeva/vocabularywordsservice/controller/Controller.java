@@ -22,10 +22,11 @@ public class Controller {
         wordsService.setWordsCount(count);
         List<GeneratedWords> generatedWordList = new ArrayList<>(count);
         generatedWordList.addAll(wordsService.getWords());
-        new Thread(() -> {
+        Thread fillingThread = new Thread(() -> {
             wordsService.setWordsCount(5);
             wordsService.fillWordsUp();
-        }).start();
+        });
+        fillingThread.start();
         return ResponseEntity.ok().body(generatedWordList);
     }
 }

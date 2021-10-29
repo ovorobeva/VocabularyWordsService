@@ -52,6 +52,9 @@ public class TranslateClient {
             e.printStackTrace();
         }
 
+        TranslateClient.logger.log(Level.INFO, "translate client: body is: " + requestBody);
+
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
                 .header("Content-Type", "application/json")
@@ -71,6 +74,7 @@ public class TranslateClient {
             } else if (response.statusCode() == 429) {
                 throw new TooManyRequestsException();
             } else if (response.statusCode() == 405) {
+                Thread.sleep(10000);
                 return getTranslate(word);
             } else {
                 TranslateClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.uri() +

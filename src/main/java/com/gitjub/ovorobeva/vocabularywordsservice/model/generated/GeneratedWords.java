@@ -3,6 +3,7 @@ package com.gitjub.ovorobeva.vocabularywordsservice.model.generated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.test.annotation.DirtiesContext;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -12,11 +13,16 @@ import java.util.Objects;
 @Setter
 @RequiredArgsConstructor
 @Entity
-@Table(name = "Generated_words", uniqueConstraints = @UniqueConstraint(columnNames={"English"}))
+@Table(name = "Generated_words", uniqueConstraints = @UniqueConstraint(columnNames={"English", "Code"}))
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class GeneratedWords {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;
+
+    @Column (name = "Code")
+    @NotNull(message = "Code cannot be null")
+    private int code;
 
     @Column (name = "English")
     @NotNull(message = "English translation cannot be null")
@@ -25,8 +31,9 @@ public class GeneratedWords {
     @Column (name = "Russian")
     private String ru;
 
-    public GeneratedWords(String en) {
+    public GeneratedWords(String en, int code) {
         this.en = en.toLowerCase();
+        this.code = code;
     }
 
     @Override
@@ -35,6 +42,7 @@ public class GeneratedWords {
                 "id=" + id +
                 ", en='" + en + '\'' +
                 ", ru='" + ru + '\'' +
+                ", code=" + code +
                 '}';
     }
 
