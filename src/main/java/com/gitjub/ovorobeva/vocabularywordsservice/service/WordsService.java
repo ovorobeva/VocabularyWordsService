@@ -22,19 +22,16 @@ public class WordsService {
     WordsRepository wordsRepository;
     Random random = new Random();
     private int wordsCount = 0;
-    private Set<GeneratedWords> wordsToReturn = new HashSet<>(wordsCount);
 
-    public Set<GeneratedWords> getWords() {
-        if (wordsToReturn.size() >= wordsCount) wordsToReturn.clear();
+    public void getRandomWords(Set<GeneratedWords> wordsToReturn) {
         for (byte i = 0; i < wordsCount; i++) {
             int id = random.nextInt((int) (wordsRepository.count() - 1));
             wordsToReturn.add(getWord(id));
         }
         if (wordsToReturn.size() < wordsCount) {
             wordsCount = wordsCount - wordsToReturn.size();
-            getWords();
+            getRandomWords(wordsToReturn);
         }
-        return wordsToReturn;
     }
 
     public GeneratedWords getWord(int id) {
@@ -67,20 +64,13 @@ public class WordsService {
             List<GeneratedWords> generatedWordsList = translation.getTranslates(wordsProcessing);
             wordsRepository.saveAll(generatedWordsList);
         } else
-            saveWords(recordsCount, max, codes);
+            saveMissingWords(recordsCount, max, codes);
     }
 
-    private void saveWords(int recordsCount, int max, int[] codes) {
+    private void saveMissingWords(int recordsCount, int max, int[] codes) {
         wordsProcessing.setCode(0);
         wordsProcessing.setWordsCount(wordsCount);
         List<GeneratedWords> generatedWordsList = translation.getTranslates(wordsProcessing);
-      /*  synchronized (translation.syncObj){
-            try {
-                translation.syncObj.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }*/
         int start = 0;
         int end = recordsCount - 1;
         int count;
@@ -118,9 +108,6 @@ public class WordsService {
                 generatedWordsList.get(i).setCode(missingCodes.get(i));
             else generatedWordsList.get(i).setCode(++max);
         }
-/*        wordsProcessing.setCode(max + 1);
-        wordsProcessing.setWordsCount(wordsCount - generatedWordsList.size());
-        generatedWordsList.addAll(translation.getTranslates(wordsProcessing));*/
         wordsRepository.saveAll(generatedWordsList);
     }
 
