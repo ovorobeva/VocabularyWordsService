@@ -38,7 +38,7 @@ public class WordsService {
         System.out.println("getting word with id = " + id);
         int size = (int) wordsRepository.count();
         if (wordsRepository.findByCode(id).isEmpty()) {
-            id = random.nextInt(50);
+            id = random.nextInt(size);
             getWord(id);
         } else
             return wordsRepository.findByCode(id).get();
@@ -49,7 +49,7 @@ public class WordsService {
     public synchronized void fillWordsUp() {
         if (wordsCount == 0) {
             if (wordsRepository.count() == 0)
-                wordsCount = 20;
+                wordsCount = Integer.parseInt(System.getenv().get("DEFAULT_WORD_COUNT"));
             else return;
         }
         int[] codes = wordsRepository.getCodes();
@@ -62,7 +62,8 @@ public class WordsService {
             wordsProcessing.setCode(code);
             wordsProcessing.setWordsCount(wordsCount);
             List<GeneratedWords> generatedWordsList = translation.getTranslates(wordsProcessing);
-            wordsRepository.saveAll(generatedWordsList);
+            generatedWordsList.forEach(generatedWords -> wordsRepository.save(generatedWords));
+            wordsRepository.flush();
         } else
             saveMissingWords(recordsCount, max, codes);
     }
@@ -81,7 +82,7 @@ public class WordsService {
             while (end - start > 1) {
                 count = (end - start) / 2 + start;
                 System.out.println("i = " + i + "; start = " + start + "; end = " + end + "; count = " + count
-                + "\ncodes[" + count + "] = " + codes[count] + " compairing to " + (count + 1 + missingCodes.size()));
+                        + "\ncodes[" + count + "] = " + codes[count] + " compairing to " + (count + 1 + missingCodes.size()));
                 if (codes[count] == count + 1 + missingCodes.size()) {
                     start = count;
                 } else {
@@ -103,12 +104,12 @@ public class WordsService {
         }
         System.out.println(missingCodes);
 
-        for (int i = 0; i < generatedWordsList.size(); i++){
+        for (int i = 0; i < generatedWordsList.size(); i++) {
             if (i < missingCodes.size())
                 generatedWordsList.get(i).setCode(missingCodes.get(i));
             else generatedWordsList.get(i).setCode(++max);
         }
-        wordsRepository.saveAll(generatedWordsList);
+        generatedWordsList.forEach(generatedWords -> wordsRepository.save(generatedWords));
+        wordsRepository.flush();
     }
-
 }
