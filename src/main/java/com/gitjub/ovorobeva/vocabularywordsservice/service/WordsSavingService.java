@@ -6,47 +6,26 @@ import com.gitjub.ovorobeva.vocabularywordsservice.translates.Translation;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsProcessing;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Data
-public class WordsService {
+public class WordsSavingService {
     @Autowired
     Translation translation;
     @Autowired
     WordsProcessing wordsProcessing;
     @Autowired
     WordsRepository wordsRepository;
-    Random random = new Random();
-    private int wordsCount = 0;
-
-    public void getRandomWords(Set<GeneratedWords> wordsToReturn) {
-        for (byte i = 0; i < wordsCount; i++) {
-            int id = random.nextInt((int) (wordsRepository.count() - 1));
-            wordsToReturn.add(getWord(id));
-        }
-        if (wordsToReturn.size() < wordsCount) {
-            wordsCount = wordsCount - wordsToReturn.size();
-            getRandomWords(wordsToReturn);
-        }
-    }
-
-    public GeneratedWords getWord(int id) {
-        System.out.println("getting word with id = " + id);
-        int size = (int) wordsRepository.count();
-        if (wordsRepository.findByCode(id).isEmpty()) {
-            id = random.nextInt(size);
-            getWord(id);
-        } else
-            return wordsRepository.findByCode(id).get();
-        return null;
-    }
 
     @PostConstruct
-    public synchronized void fillWordsUp() {
+    public synchronized void fillWordsUp(@Nullable int wordsCount) {
         if (wordsCount == 0) {
             if (wordsRepository.count() == 0)
                 wordsCount = Integer.parseInt(System.getenv().get("DEFAULT_WORD_COUNT"));
@@ -65,10 +44,10 @@ public class WordsService {
             generatedWordsList.forEach(generatedWords -> wordsRepository.save(generatedWords));
             wordsRepository.flush();
         } else
-            saveMissingWords(recordsCount, max, codes);
+            saveMissingWords(wordsCount, recordsCount, max, codes);
     }
 
-    private void saveMissingWords(int recordsCount, int max, int[] codes) {
+    private void saveMissingWords(int wordsCount, int recordsCount, int max, int[] codes) {
         wordsProcessing.setCode(0);
         wordsProcessing.setWordsCount(wordsCount);
         List<GeneratedWords> generatedWordsList = translation.getTranslates(wordsProcessing);
