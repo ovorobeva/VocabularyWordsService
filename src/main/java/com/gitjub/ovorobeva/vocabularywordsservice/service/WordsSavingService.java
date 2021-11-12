@@ -6,7 +6,6 @@ import com.gitjub.ovorobeva.vocabularywordsservice.translates.Translation;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsProcessing;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -24,8 +23,10 @@ public class WordsSavingService {
     @Autowired
     WordsRepository wordsRepository;
 
-    @PostConstruct
-    public synchronized void fillWordsUp(@Nullable int wordsCount) {
+    private int wordsCount = 0;
+
+    public synchronized void fillWordsUp(int wordsCount) {
+        this.wordsCount = wordsCount;
         if (wordsCount == 0) {
             if (wordsRepository.count() == 0)
                 wordsCount = Integer.parseInt(System.getenv().get("DEFAULT_WORD_COUNT"));
@@ -90,5 +91,15 @@ public class WordsSavingService {
         }
         generatedWordsList.forEach(generatedWords -> wordsRepository.save(generatedWords));
         wordsRepository.flush();
+    }
+
+    @PostConstruct
+    private void defaultFillUp() {
+        if (wordsCount == 0) {
+            if (wordsRepository.count() == 0) {
+                wordsCount = Integer.parseInt(System.getenv().get("DEFAULT_WORD_COUNT"));
+                fillWordsUp(wordsCount);
+            } else return;
+        }
     }
 }
