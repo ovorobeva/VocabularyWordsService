@@ -31,6 +31,9 @@ public class GeneratedWords {
     @Column (name = "Russian")
     private String ru;
 
+    @Column (name = "French")
+    private String fr;
+
     public GeneratedWords(String en, int code) {
         this.en = en.toLowerCase();
         this.code = code;
@@ -42,6 +45,7 @@ public class GeneratedWords {
                 "id=" + id +
                 ", en='" + en + '\'' +
                 ", ru='" + ru + '\'' +
+                ", fr='" + fr + '\'' +
                 ", code=" + code +
                 '}';
     }

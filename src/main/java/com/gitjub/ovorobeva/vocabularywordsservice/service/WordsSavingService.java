@@ -2,7 +2,7 @@ package com.gitjub.ovorobeva.vocabularywordsservice.service;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
-import com.gitjub.ovorobeva.vocabularywordsservice.translates.Translation;
+import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateService;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsProcessing;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 public class WordsSavingService {
     @Autowired
-    Translation translation;
+    TranslateService translateService;
     @Autowired
     WordsProcessing wordsProcessing;
     @Autowired
@@ -41,7 +41,7 @@ public class WordsSavingService {
             code = ++recordsCount;
             wordsProcessing.setCode(code);
             wordsProcessing.setWordsCount(wordsCount);
-            List<GeneratedWords> generatedWordsList = translation.getTranslates(wordsProcessing);
+            List<GeneratedWords> generatedWordsList = translateService.getTranslates(wordsProcessing);
             generatedWordsList.forEach(generatedWords -> wordsRepository.save(generatedWords));
             wordsRepository.flush();
         } else
@@ -51,7 +51,7 @@ public class WordsSavingService {
     private void saveMissingWords(int wordsCount, int recordsCount, int max, int[] codes) {
         wordsProcessing.setCode(0);
         wordsProcessing.setWordsCount(wordsCount);
-        List<GeneratedWords> generatedWordsList = translation.getTranslates(wordsProcessing);
+        List<GeneratedWords> generatedWordsList = translateService.getTranslates(wordsProcessing);
         int start = 0;
         int end = recordsCount - 1;
         int count;

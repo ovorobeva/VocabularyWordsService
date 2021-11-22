@@ -4,18 +4,16 @@ import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWord
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsClient;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
-@Component
-public class Translation {
-    public final Object syncObj = new Object();
-
+@Service
+public class TranslateService {
     @Autowired
-    TranslateClient translateClient;
+    TranslateFactory factory;
     @Autowired
     WordsProcessing wordsProcessing;
 
@@ -30,17 +28,16 @@ public class Translation {
         WordsClient.logger.log(Level.INFO, "Parsing finished. Words are: " + wordList);
 
         try {
+            TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
+            TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
             for (GeneratedWords word : wordList) {
                 WordsClient.logger.log(Level.INFO, "Getting translation for the word: " + word.getEn());
-                translateClient.getTranslate(word);
+                translateClientRu.getTranslate(word);
+                translateClientFr.getTranslate(word);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-       /* synchronized (syncObj){
-            syncObj.notify();
-        }*/
         return wordList;
     }
 }
