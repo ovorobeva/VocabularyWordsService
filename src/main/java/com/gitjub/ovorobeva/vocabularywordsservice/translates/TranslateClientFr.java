@@ -18,7 +18,7 @@ import java.util.logging.Level;
 public class TranslateClientFr implements TranslateClient{
 
     @Override
-    public String getTranslate(GeneratedWords word) throws InterruptedException {
+    public void translateWord(GeneratedWords word) throws InterruptedException {
 
         Map<String, String> apiVariables = new HashMap<>();
         apiVariables.put("sourceLanguageCode", "en");
@@ -53,7 +53,7 @@ public class TranslateClientFr implements TranslateClient{
                 throw new TooManyRequestsException();
             } else if (response.statusCode() == 405) {
                 Thread.sleep(10000);
-                return getTranslate(word);
+                translateWord(word);
             } else {
                 TranslateClientFr.logger.log(Level.SEVERE, "There is an error during request by link " + response.uri() +
                         " . Error code is: " + response.statusCode() +
@@ -67,10 +67,9 @@ public class TranslateClientFr implements TranslateClient{
         } catch (TooManyRequestsException e) {
             Thread.sleep(10000);
             e.printStackTrace();
-            return getTranslate(word);
+            translateWord(word);
         }
 
-        return word.getFr();
     }
 
 }

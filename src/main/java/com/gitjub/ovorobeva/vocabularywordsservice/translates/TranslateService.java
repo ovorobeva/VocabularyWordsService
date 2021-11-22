@@ -32,8 +32,8 @@ public class TranslateService {
             TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
             for (GeneratedWords word : wordList) {
                 WordsClient.logger.log(Level.INFO, "Getting translation for the word: " + word.getEn());
-                translateClientRu.getTranslate(word);
-                translateClientFr.getTranslate(word);
+                translateClientRu.translateWord(word);
+                translateClientFr.translateWord(word);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
