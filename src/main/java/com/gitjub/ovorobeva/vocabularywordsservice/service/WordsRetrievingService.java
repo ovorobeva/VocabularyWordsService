@@ -1,7 +1,7 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.service;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.dao.WordsRepository;
-import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,9 +14,9 @@ import java.util.Set;
 public class WordsRetrievingService {
     @Autowired
     WordsRepository wordsRepository;
-    Random random = new Random();
+    private Random random = new Random();
 
-    public void getRandomWords(int wordsCount, Set<GeneratedWords> wordsToReturn) {
+    public void getRandomWords(int wordsCount, Set<GeneratedWordsDto> wordsToReturn) {
         for (byte i = 0; i < wordsCount; i++) {
             int id = random.nextInt((int) (wordsRepository.count() - 1));
             wordsToReturn.add(getWord(id));
@@ -25,9 +25,10 @@ public class WordsRetrievingService {
             wordsCount = wordsCount - wordsToReturn.size();
             getRandomWords(wordsCount, wordsToReturn);
         }
+
     }
 
-    public GeneratedWords getWord(int id) {
+    public GeneratedWordsDto getWord(int id) {
         System.out.println("getting word with id = " + id);
         int size = (int) wordsRepository.count();
         if (wordsRepository.findByCode(id).isEmpty()) {

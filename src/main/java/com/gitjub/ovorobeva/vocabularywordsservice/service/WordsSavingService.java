@@ -1,7 +1,7 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.service;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.dao.WordsRepository;
-import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateService;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsProcessing;
 import lombok.Data;
@@ -41,7 +41,7 @@ public class WordsSavingService {
             code = ++recordsCount;
             wordsProcessing.setCode(code);
             wordsProcessing.setWordsCount(wordsCount);
-            List<GeneratedWords> generatedWordsList = translateService.getTranslates(wordsProcessing);
+            List<GeneratedWordsDto> generatedWordsList = translateService.getTranslates(wordsProcessing);
             generatedWordsList.forEach(generatedWords -> wordsRepository.save(generatedWords));
             wordsRepository.flush();
         } else
@@ -51,27 +51,21 @@ public class WordsSavingService {
     private void saveMissingWords(int wordsCount, int recordsCount, int max, int[] codes) {
         wordsProcessing.setCode(0);
         wordsProcessing.setWordsCount(wordsCount);
-        List<GeneratedWords> generatedWordsList = translateService.getTranslates(wordsProcessing);
+        List<GeneratedWordsDto> generatedWordsList = translateService.getTranslates(wordsProcessing);
         int start = 0;
         int end = recordsCount - 1;
         int count;
         int limit = Math.min(wordsCount, max - recordsCount);
-        System.out.println("wordscount = " + wordsCount + "\nmax = " + max + "\nrecordscount = " + recordsCount + "\nlimit = " + limit + "\n");
         List<Integer> missingCodes = new ArrayList<>(limit);
         for (int i = 0; missingCodes.size() < limit; i++) {
             while (end - start > 1) {
                 count = (end - start) / 2 + start;
-                System.out.println("i = " + i + "; start = " + start + "; end = " + end + "; count = " + count
-                        + "\ncodes[" + count + "] = " + codes[count] + " compairing to " + (count + 1 + missingCodes.size()));
                 if (codes[count] == count + 1 + missingCodes.size()) {
                     start = count;
                 } else {
                     end = count;
                 }
             }
-            System.out.println("end - start  = " + end + " - " + start + " = " + (end - start)
-                    + " that is < 1.\nCode["
-                    + start + "] = " + codes[start] + " compairing to " + (start + 1 + missingCodes.size()));
             if (codes[start] == start + 1 + missingCodes.size())
                 start++;
             else {
@@ -79,8 +73,6 @@ public class WordsSavingService {
             }
             System.out.println(missingCodes);
             end = recordsCount - 1;
-            System.out.println("end of the " + i + "th iteration");
-            //todo: to add found numbers
         }
         System.out.println(missingCodes);
 

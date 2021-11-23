@@ -1,6 +1,6 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.translates;
 
-import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsClient;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,8 @@ public class TranslateService {
     @Autowired
     WordsProcessing wordsProcessing;
 
-    public List<GeneratedWords> getTranslates(WordsProcessing wordsProcessing) {
-        List<GeneratedWords> wordList = new LinkedList<>();
+    public List<GeneratedWordsDto> getTranslates(WordsProcessing wordsProcessing) {
+        List<GeneratedWordsDto> wordList = new LinkedList<>();
         try {
             wordsProcessing.getWords(wordList);
         } catch (InterruptedException e) {
@@ -30,7 +30,7 @@ public class TranslateService {
         try {
             TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
             TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
-            for (GeneratedWords word : wordList) {
+            for (GeneratedWordsDto word : wordList) {
                 WordsClient.logger.log(Level.INFO, "Getting translation for the word: " + word.getEn());
                 translateClientRu.translateWord(word);
                 translateClientFr.translateWord(word);

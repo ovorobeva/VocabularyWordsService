@@ -1,7 +1,7 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.translates;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -29,5 +29,5 @@ public interface TranslateClient {
             .build();
     Gson converter = new Gson();
 
-    void translateWord(GeneratedWords word) throws InterruptedException;
+    void translateWord(GeneratedWordsDto word) throws InterruptedException;
 }

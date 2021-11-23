@@ -1,6 +1,6 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 
-import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +41,7 @@ public class WordsProcessing {
     }
 
 
-    public void getWords(List<GeneratedWords> generatedWordsList) throws InterruptedException {
+    public void getWords(List<GeneratedWordsDto> generatedWordsList) throws InterruptedException {
         List<String> words = wordsClient.getRandomWords(wordsCount);
 
         Iterator<String> iterator = words.iterator();
@@ -65,7 +65,7 @@ public class WordsProcessing {
                 WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of the wrong part of speech. The count of deleted words is " + removedCounter);
                 continue;
             }
-            generatedWordsList.add(new GeneratedWords(word, code));
+            generatedWordsList.add(new GeneratedWordsDto(word, code));
             code++;
         }
         if (removedCounter > 0) {

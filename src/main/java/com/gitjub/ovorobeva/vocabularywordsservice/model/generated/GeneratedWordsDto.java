@@ -15,7 +15,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "Generated_words", uniqueConstraints = @UniqueConstraint(columnNames={"English", "Code"}))
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-public class GeneratedWords {
+public class GeneratedWordsDto {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -34,7 +34,7 @@ public class GeneratedWords {
     @Column (name = "French")
     private String fr;
 
-    public GeneratedWords(String en, int code) {
+    public GeneratedWordsDto(String en, int code) {
         this.en = en.toLowerCase();
         this.code = code;
     }
@@ -53,8 +53,8 @@ public class GeneratedWords {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GeneratedWords)) return false;
-        GeneratedWords that = (GeneratedWords) o;
+        if (!(o instanceof GeneratedWordsDto)) return false;
+        GeneratedWordsDto that = (GeneratedWordsDto) o;
         return getEn().equals(that.getEn()) && getRu().equals(that.getRu());
     }
 

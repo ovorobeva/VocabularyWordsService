@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class PartsOfSpeech {
+public class PartsOfSpeechDto {
 
         private String word;
         private String phonetic;
@@ -20,5 +20,17 @@ public class PartsOfSpeech {
     @Override
     public String toString() {
         return meanings.toString();
+    }
+    @Data
+    public static class Meaning {
+
+        private String partOfSpeech;
+        private List<Object> definitions = null;
+        private Map<Object, Object> additionalProperties = new HashMap<>();
+
+        @Override
+        public String toString() {
+            return partOfSpeech + ", ";
+        }
     }
 }

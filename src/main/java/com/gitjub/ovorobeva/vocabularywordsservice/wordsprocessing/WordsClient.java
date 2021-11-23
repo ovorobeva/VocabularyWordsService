@@ -1,9 +1,8 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
-import com.gitjub.ovorobeva.vocabularywordsservice.model.partsofspeech.Meaning;
-import com.gitjub.ovorobeva.vocabularywordsservice.model.partsofspeech.PartsOfSpeech;
-import com.gitjub.ovorobeva.vocabularywordsservice.model.words.WordsMessage;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.partsofspeech.PartsOfSpeechDto;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.words.RandomWordsDto;
 import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.springframework.stereotype.Service;
@@ -98,7 +97,7 @@ public class WordsClient {
                 JSONArray jsonMessages = new JSONArray(response.body());
                 for (Object message : jsonMessages) {
                     returnedWords++;
-                    words.add(converter.fromJson(message.toString(), WordsMessage.class).getWord());
+                    words.add(converter.fromJson(message.toString(), RandomWordsDto.class).getWord());
                 }
                 WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.uri());
                 WordsClient.logger.log(Level.INFO, "execute. Response to process is: " + words);
@@ -144,9 +143,9 @@ public class WordsClient {
             if (response.get().statusCode() >= 200 && response.get().statusCode() < 300) {
                 WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.get().uri());
                 JSONArray jsonMessages = new JSONArray(response.get().body());
-                List<Meaning> meanings = converter.fromJson(jsonMessages.get(0).toString(), PartsOfSpeech.class).getMeanings();
+                List<PartsOfSpeechDto.Meaning> meanings = converter.fromJson(jsonMessages.get(0).toString(), PartsOfSpeechDto.class).getMeanings();
                 if (meanings.isEmpty()) return null;
-                for (Meaning message : meanings) {
+                for (PartsOfSpeechDto.Meaning message : meanings) {
                     String partOfSpeech = message.getPartOfSpeech();
                     if (partOfSpeech != null && !partOfSpeech.isEmpty()) {
                         partsOfSpeech.add(partOfSpeech.toLowerCase());

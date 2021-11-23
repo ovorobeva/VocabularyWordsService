@@ -1,6 +1,6 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.controller;
 
-import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWords;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.gitjub.ovorobeva.vocabularywordsservice.service.WordsRetrievingService;
 import com.gitjub.ovorobeva.vocabularywordsservice.service.WordsSavingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +21,8 @@ public class Controller {
     WordsRetrievingService wordsRetrievingService;
 
     @GetMapping("/getwords/{count}")
-    public ResponseEntity<Set<GeneratedWords>> getWords(@PathVariable int count) {
-        Set<GeneratedWords> generatedWordList = new HashSet<>(count);
+    public ResponseEntity<Set<GeneratedWordsDto>> getWords(@PathVariable int count) {
+        Set<GeneratedWordsDto> generatedWordList = new HashSet<>(count);
         wordsRetrievingService.getRandomWords(count, generatedWordList);
         Thread fillingThread = new Thread(() -> {
             int wordCount = Integer.parseInt(System.getenv().get("DEFAULT_WORD_COUNT"));

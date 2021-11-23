@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class WordsMessage {
+public class RandomWordsDto {
 
     private Integer id;
     private String word;
