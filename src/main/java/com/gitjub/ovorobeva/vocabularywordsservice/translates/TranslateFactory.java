@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class TranslateFactory {
 
 
-    TranslateClient getTranslateClient(Language language){
+    public TranslateClient getTranslateClient(Language language){
         switch (language) {
             case RU: return new TranslateClientRu();
             case FR: return new TranslateClientFr();

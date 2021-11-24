@@ -16,9 +16,6 @@ public class WordsProcessing {
     @Autowired
     WordsClient wordsClient;
 
-    private int wordsCount;
-    private int code;
-
     private static Boolean isPartOfSpeechCorrect(String word, WordsClient wordsClient) throws InterruptedException {
         WordsClient.logger.log(Level.INFO, "isPartOfSpeechCorrect: the word " + word + " is being checked");
         boolean isCorrect = true;
@@ -41,7 +38,7 @@ public class WordsProcessing {
     }
 
 
-    public void getWords(List<GeneratedWordsDto> generatedWordsList) throws InterruptedException {
+    public void getWords(List<GeneratedWordsDto> generatedWordsList, int wordsCount, int lastCode) throws InterruptedException {
         List<String> words = wordsClient.getRandomWords(wordsCount);
 
         Iterator<String> iterator = words.iterator();
@@ -65,12 +62,12 @@ public class WordsProcessing {
                 WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of the wrong part of speech. The count of deleted words is " + removedCounter);
                 continue;
             }
-            generatedWordsList.add(new GeneratedWordsDto(word, code));
-            code++;
+            generatedWordsList.add(new GeneratedWordsDto(word, lastCode));
+            lastCode++;
         }
         if (removedCounter > 0) {
             wordsCount = removedCounter;
-            getWords(generatedWordsList);
+            getWords(generatedWordsList, wordsCount, lastCode);
         }
     }
 }
