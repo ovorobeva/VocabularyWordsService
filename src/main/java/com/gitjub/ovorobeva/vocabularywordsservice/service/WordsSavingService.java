@@ -6,7 +6,7 @@ import com.gitjub.ovorobeva.vocabularywordsservice.translates.Language;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsClient;
-import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsProcessing;
+import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,9 +26,10 @@ public class WordsSavingService {
     @Autowired
     TranslateFactory factory;
     @Autowired
-    WordsProcessing wordsProcessing;
+    WordsHandler wordsHandler;
     @Autowired
     WordsRepository wordsRepository;
+
     private int wordsCount = 0;
 
     public synchronized void fillWordsUp(int wordsCount) {
@@ -44,7 +45,7 @@ public class WordsSavingService {
             List<GeneratedWordsDto> wordList = new LinkedList<>();
             List<GeneratedWordsDto> generatedWordsList = null;
             try {
-                wordsProcessing.getWords(wordList, wordsCount, code);
+                wordsHandler.getProcessedWords(wordList, wordsCount, code);
                 generatedWordsList = getTranslates(wordList);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -62,7 +63,7 @@ public class WordsSavingService {
         List<GeneratedWordsDto> wordList = new LinkedList<>();
         List<GeneratedWordsDto> generatedWordsList = null;
         try {
-            wordsProcessing.getWords(wordList, wordsCount, 0);
+            wordsHandler.getProcessedWords(wordList, wordsCount, 0);
             generatedWordsList = getTranslates(wordList);
         } catch (InterruptedException e) {
             e.printStackTrace();
