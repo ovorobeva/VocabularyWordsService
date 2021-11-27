@@ -1,10 +1,10 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.translates;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.gitjub.ovorobeva.vocabularywordsservice.model.translate.TranslateDto;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,22 +17,18 @@ import java.util.logging.Level;
 @Service
 public class TranslateClientFr implements TranslateClient{
 
+    @SneakyThrows
     @Override
-    public void translateWord(GeneratedWordsDto word) throws InterruptedException {
+    public void translateWord(GeneratedWordsDto word) {
 
         Map<String, String> apiVariables = new HashMap<>();
         apiVariables.put("sourceLanguageCode", "en");
         apiVariables.put("targetLanguageCode", "fr");
         apiVariables.put("texts", word.getEn());
 
-        String requestBody = null;
-        try {
-            requestBody = objectMapper
+        String requestBody = objectMapper
                     .writerWithDefaultPrettyPrinter()
                     .writeValueAsString(apiVariables);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
 
         TranslateClientFr.logger.log(Level.INFO, "translate client: body is: " + requestBody);
 
@@ -59,14 +55,18 @@ public class TranslateClientFr implements TranslateClient{
                         " Error is: " + response.body());
                 word.setFr("Translation is not found");
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             TranslateClientFr.logger.log(Level.SEVERE, "Something went wrong. Error is: " + e.getMessage());
             word.setFr("Translation is not found");
             e.printStackTrace();
         } catch (TooManyRequestsException e) {
-            Thread.sleep(10000);
-            e.printStackTrace();
-            translateWord(word);
+            try {
+                Thread.sleep(10000);
+                e.printStackTrace();
+                translateWord(word);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
 
     }

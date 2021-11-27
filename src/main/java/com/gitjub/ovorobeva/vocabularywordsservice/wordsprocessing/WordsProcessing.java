@@ -16,7 +16,8 @@ public class WordsProcessing {
     @Autowired
     WordsClient wordsClient;
 
-    private static Boolean isPartOfSpeechCorrect(String word, WordsClient wordsClient) throws InterruptedException {
+    private static Boolean isPartOfSpeechCorrect(String word,
+                                                 WordsClient wordsClient) throws InterruptedException {
         WordsClient.logger.log(Level.INFO, "isPartOfSpeechCorrect: the word " + word + " is being checked");
         boolean isCorrect = true;
         List<String> partsOfSpeech = wordsClient.getPartsOfSpeech(word);
@@ -37,8 +38,9 @@ public class WordsProcessing {
         return isCorrect;
     }
 
-
-    public void getWords(List<GeneratedWordsDto> generatedWordsList, int wordsCount, int lastCode) throws InterruptedException {
+    public void getWords(List<GeneratedWordsDto> generatedWordsList,
+                         int wordsCount,
+                         int lastCode) throws InterruptedException {
         List<String> words = wordsClient.getRandomWords(wordsCount);
 
         Iterator<String> iterator = words.iterator();

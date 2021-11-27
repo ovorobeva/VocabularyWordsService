@@ -29,5 +29,5 @@ public interface TranslateClient {
             .build();
     Gson converter = new Gson();
 
-    void translateWord(GeneratedWordsDto word) throws InterruptedException;
+    void translateWord(GeneratedWordsDto word);
 }
