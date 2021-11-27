@@ -32,7 +32,7 @@ public class WordsHandler {
 
         WordsClient.logger.log(Level.INFO, "getWords: Starting removing non-matching words from the list \n" + words);
 
-        ExecutorService executor = Executors.newFixedThreadPool(words.size());
+        ExecutorService executor = Executors.newFixedThreadPool(wordsCount);
         while (iterator.hasNext()) {
             String word = iterator.next();
             Pattern pattern = Pattern.compile("[^a-zA-Z[-]]");
@@ -48,7 +48,6 @@ public class WordsHandler {
                 }
             });
         }
-        System.out.println("added words" + checkedWords);
 
         executor.shutdown();
         while (!executor.isTerminated()) {
@@ -61,11 +60,10 @@ public class WordsHandler {
             lastCode++;
         }
 
-        if (generatedWordsList.size() < words.size()) {
-            wordsCount = words.size() - generatedWordsList.size();
+        if (generatedWordsList.size() < wordsCount) {
+            wordsCount = wordsCount - generatedWordsList.size();
             getProcessedWords(generatedWordsList, wordsCount, lastCode);
         }
-        System.out.println("GWL " + generatedWordsList);
     }
 
     private Boolean isPartOfSpeechCorrect(String word) {
