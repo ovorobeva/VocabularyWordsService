@@ -2,10 +2,7 @@ package com.gitjub.ovorobeva.vocabularywordsservice.service;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
-import com.gitjub.ovorobeva.vocabularywordsservice.translates.Language;
-import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
-import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsClient;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
 
 @Service
 @Data
@@ -43,14 +39,12 @@ public class WordsSavingService {
             code = ++recordsCount;
 
             List<GeneratedWordsDto> wordList = new LinkedList<>();
-            List<GeneratedWordsDto> generatedWordsList = null;
             try {
                 wordsHandler.getProcessedWords(wordList, wordsCount, code);
-                generatedWordsList = getTranslates(wordList);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            generatedWordsList.forEach(generatedWords -> wordsRepository.save(generatedWords));
+            wordList.forEach(generatedWords -> wordsRepository.save(generatedWords));
             wordsRepository.flush();
         } else
             saveMissingWords(wordsCount, recordsCount, max, codes);
@@ -61,10 +55,8 @@ public class WordsSavingService {
                                                int max,
                                                int[] codes) {
         List<GeneratedWordsDto> wordList = new LinkedList<>();
-        List<GeneratedWordsDto> generatedWordsList = null;
         try {
             wordsHandler.getProcessedWords(wordList, wordsCount, 0);
-            generatedWordsList = getTranslates(wordList);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -91,29 +83,13 @@ public class WordsSavingService {
             end = recordsCount - 1;
         }
 
-        for (int i = 0; i < generatedWordsList.size(); i++) {
+        for (int i = 0; i < wordList.size(); i++) {
             if (i < missingCodes.size())
-                generatedWordsList.get(i).setCode(missingCodes.get(i));
-            else generatedWordsList.get(i).setCode(++max);
+                wordList.get(i).setCode(missingCodes.get(i));
+            else wordList.get(i).setCode(++max);
         }
-        generatedWordsList.forEach(generatedWords -> wordsRepository.save(generatedWords));
+        wordList.forEach(generatedWords -> wordsRepository.save(generatedWords));
         wordsRepository.flush();
-    }
-
-    private List<GeneratedWordsDto> getTranslates(List<GeneratedWordsDto> wordList) throws InterruptedException {
-
-        WordsClient.logger.log(Level.INFO, "Parsing finished. Words are: " + wordList);
-
-        TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
-        TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
-        for (GeneratedWordsDto word : wordList) {
-            WordsClient.logger.log(Level.INFO, "Getting translation for the word: " + word.getEn());
-            translateClientRu.translateWord(word);
-            Thread frenchThread = new Thread(() -> translateClientFr.translateWord(word));
-            frenchThread.start();
-            frenchThread.join();
-        }
-        return wordList;
     }
 
     @PostConstruct

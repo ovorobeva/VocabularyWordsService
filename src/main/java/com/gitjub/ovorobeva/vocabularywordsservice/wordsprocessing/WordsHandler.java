@@ -1,6 +1,9 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.gitjub.ovorobeva.vocabularywordsservice.translates.Language;
+import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateClient;
+import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,8 @@ public class WordsHandler {
     WordsClient wordsClient;
     @Autowired
     PartsOfSpeechClient partsOfSpeechClient;
+    @Autowired
+    TranslateFactory factory;
 
 
     public void getProcessedWords(List<GeneratedWordsDto> generatedWordsList,
@@ -53,10 +58,18 @@ public class WordsHandler {
         while (!executor.isTerminated()) {
         }
 
+        TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
+        TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
+
         iterator = checkedWords.iterator();
         while (iterator.hasNext()) {
             String addedWord = iterator.next();
-            generatedWordsList.add(new GeneratedWordsDto(addedWord, lastCode));
+            GeneratedWordsDto word = new GeneratedWordsDto(addedWord, lastCode);
+            translateClientRu.translateWord(word);
+            Thread frenchThread = new Thread(() -> translateClientFr.translateWord(word));
+            frenchThread.start();
+            frenchThread.join();
+            generatedWordsList.add(word);
             lastCode++;
         }
 
