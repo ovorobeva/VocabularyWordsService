@@ -18,7 +18,7 @@ public class WordsRetrievingService {
 
     public void getRandomWords(int wordsCount, Set<GeneratedWordsDto> wordsToReturn) {
         for (byte i = 0; i < wordsCount; i++) {
-            int id = random.nextInt((int) (wordsRepository.count() - 1));
+            int id = random.nextInt((int) (wordsRepository.count() - 2)) + 1;
             wordsToReturn.add(getWord(id));
         }
         if (wordsToReturn.size() < wordsCount) {
