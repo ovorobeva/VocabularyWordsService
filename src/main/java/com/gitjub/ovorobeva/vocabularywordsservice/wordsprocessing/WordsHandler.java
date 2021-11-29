@@ -26,6 +26,8 @@ public class WordsHandler {
     PartsOfSpeechClient partsOfSpeechClient;
     @Autowired
     TranslateFactory factory;
+    @Autowired
+    ProfanityCheckerClient profanityCheckerClient;
 
 
     public void getProcessedWords(List<GeneratedWordsDto> generatedWordsList,
@@ -48,6 +50,8 @@ public class WordsHandler {
                     WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
                 } else if (!isPartOfSpeechCorrect(word)) {
                     WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of the wrong part of speech.");
+                }else if (profanityCheckerClient.isProfanity(word)){
+                    WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of profanity.");
                 } else {
                     checkedWords.add(word);
                 }

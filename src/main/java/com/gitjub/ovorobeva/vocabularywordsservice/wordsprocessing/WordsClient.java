@@ -101,8 +101,7 @@ public class WordsClient {
             } else if (response.statusCode() == 429) {
                 throw new TooManyRequestsException();
             } else
-                WordsClient.logger.log(Level.SEVERE, "Words count is " + wordsCount);
-            WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + request.uri() + " . Error code is: " + response.statusCode());
+                WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + request.uri() + " . Error code is: " + response.statusCode());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (TooManyRequestsException e) {
