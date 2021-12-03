@@ -28,6 +28,8 @@ public class WordsHandler {
     TranslateFactory factory;
     @Autowired
     ProfanityCheckerClient profanityCheckerClient;
+    @Autowired
+    LemmaClient lemmaClient;
 
 
     public void getProcessedWords(List<GeneratedWordsDto> generatedWordsList,
@@ -46,14 +48,20 @@ public class WordsHandler {
 
             executor.execute(() -> {
                 Matcher matcher = pattern.matcher(word);
+                String lemma = "";
                 if (matcher.find()) {
                     WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
-                } else if (!isPartOfSpeechCorrect(word)) {
-                    WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of the wrong part of speech.");
-                }else if (profanityCheckerClient.isProfanity(word)){
-                    WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of profanity.");
                 } else {
-                    checkedWords.add(word);
+                    lemma = lemmaClient.getLemma(word);
+                    if (lemma.equals(LemmaClient.SELDOM_WORD)) {
+                        WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + lemma + " because of its never using.");
+                    } else if (!isPartOfSpeechCorrect(lemma)) {
+                        WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + lemma + " because of the wrong part of speech.");
+                    } else if (profanityCheckerClient.isProfanity(lemma)) {
+                        WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + lemma + " because of profanity.");
+                    } else {
+                        checkedWords.add(lemma);
+                    }
                 }
             });
         }
