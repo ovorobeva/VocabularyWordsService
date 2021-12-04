@@ -2,6 +2,7 @@ package com.gitjub.ovorobeva.vocabularywordsservice.service;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.gitjub.ovorobeva.vocabularywordsservice.translates.Language;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
 import lombok.Data;
@@ -101,4 +102,15 @@ public class WordsSavingService {
             }
         }
     }
+
+    @PostConstruct
+    private void fillMissingTranslates(){
+        List<GeneratedWordsDto> frenchMissingList = wordsRepository.getGeneratedWordsDtoByFrIsNull();
+        new Thread(() ->
+            frenchMissingList.forEach(generatedWordsDto -> {
+                factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
+                wordsRepository.save(generatedWordsDto);
+            })
+        ).start();
+        }
 }

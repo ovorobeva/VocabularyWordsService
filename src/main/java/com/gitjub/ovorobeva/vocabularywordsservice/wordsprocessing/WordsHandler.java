@@ -48,7 +48,7 @@ public class WordsHandler {
 
             executor.execute(() -> {
                 Matcher matcher = pattern.matcher(word);
-                String lemma = "";
+                String lemma;
                 if (matcher.find()) {
                     WordsClient.logger.log(Level.INFO, "getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
                 } else {
