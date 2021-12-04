@@ -70,17 +70,11 @@ public class WordsHandler {
         while (!executor.isTerminated()) {
         }
 
-        TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
-        TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
-
         iterator = checkedWords.iterator();
         while (iterator.hasNext()) {
             String addedWord = iterator.next();
             GeneratedWordsDto word = new GeneratedWordsDto(addedWord, lastCode);
-            translateClientRu.translateWord(word);
-            Thread frenchThread = new Thread(() -> translateClientFr.translateWord(word));
-            frenchThread.start();
-            frenchThread.join();
+            translate(word);
             generatedWordsList.add(word);
             lastCode++;
         }
@@ -91,7 +85,7 @@ public class WordsHandler {
         }
     }
 
-    private Boolean isPartOfSpeechCorrect(String word) {
+    private boolean isPartOfSpeechCorrect(String word) {
         WordsClient.logger.log(Level.INFO, "isPartOfSpeechCorrect: the word " + word + " is being checked");
         boolean isCorrect = true;
         List<String> partsOfSpeech = null;
@@ -108,13 +102,37 @@ public class WordsHandler {
         }
 
         for (String partOfSpeech : partsOfSpeech) {
-            if (!partOfSpeech.matches("(?i)noun|phrasal verb|adverb & adjective|adjective|transitive & intransitive verb|transitive verb|intransitive verb|verb|adverb|idiom|past-participle") || partOfSpeech.isEmpty()) {
+            if (!partOfSpeech.matches("(?i)noun" +
+                    "|phrasal verb" +
+                    "|adverb & adjective" +
+                    "|adjective" +
+                    "|transitive & intransitive verb" +
+                    "|transitive verb" +
+                    "|intransitive verb" +
+                    "|verb" +
+                    "|adverb" +
+                    "|idiom" +
+                    "|past-participle") || partOfSpeech.isEmpty()) {
                 WordsClient.logger.log(Level.INFO, "isPartOfSpeechCorrect: The word " + word + " is to be removed because of part of speech: " + partOfSpeech);
                 isCorrect = false;
                 break;
             }
         }
         return isCorrect;
+    }
+
+    private void translate(GeneratedWordsDto word){
+        TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
+        TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
+
+        translateClientRu.translateWord(word);
+        Thread frenchThread = new Thread(() -> translateClientFr.translateWord(word));
+        frenchThread.start();
+        try {
+            frenchThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
 
