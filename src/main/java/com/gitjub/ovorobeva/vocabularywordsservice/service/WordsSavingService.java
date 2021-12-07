@@ -7,6 +7,7 @@ import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -45,7 +46,13 @@ public class WordsSavingService {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            wordList.forEach(generatedWords -> wordsRepository.save(generatedWords));
+            wordList.forEach(generatedWords -> {
+                try {
+                    wordsRepository.save(generatedWords);
+                } catch (DataIntegrityViolationException e) {
+                    fillWordsUp(1);
+                }
+            });
             wordsRepository.flush();
         } else
             saveMissingWords(wordsCount, recordsCount, max, codes);
@@ -104,13 +111,13 @@ public class WordsSavingService {
     }
 
     @PostConstruct
-    private void fillMissingTranslates(){
+    private void fillMissingTranslates() {
         List<GeneratedWordsDto> frenchMissingList = wordsRepository.getGeneratedWordsDtoByFrIsNull();
         new Thread(() ->
-            frenchMissingList.forEach(generatedWordsDto -> {
-                factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
-                wordsRepository.save(generatedWordsDto);
-            })
+                frenchMissingList.forEach(generatedWordsDto -> {
+                    factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
+                    wordsRepository.save(generatedWordsDto);
+                })
         ).start();
-        }
+    }
 }
