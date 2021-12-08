@@ -6,6 +6,7 @@ import com.gitjub.ovorobeva.vocabularywordsservice.translates.Language;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Data
 public class WordsSavingService {
 
+    private static final int NEW_LANGUAGES_COUNT = 1;
     private final Object WAITER = new Object();
     @Autowired
     TranslateFactory factory;
@@ -56,6 +60,23 @@ public class WordsSavingService {
             wordsRepository.flush();
         } else
             saveMissingWords(wordsCount, recordsCount, max, codes);
+    }
+
+    @SneakyThrows
+    @PostConstruct
+    public synchronized void fillMissingTranslates() {
+        List<GeneratedWordsDto> frenchMissingList = wordsRepository.getGeneratedWordsDtoByFrIsNull();
+        ExecutorService executor = Executors.newFixedThreadPool(NEW_LANGUAGES_COUNT);
+        executor.execute(() ->
+                frenchMissingList.forEach(generatedWordsDto -> {
+                    factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
+                    wordsRepository.save(generatedWordsDto);
+                })
+        );
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+        }
+        System.out.println("translation is finished");
     }
 
     private synchronized void saveMissingWords(int wordsCount,
@@ -96,7 +117,13 @@ public class WordsSavingService {
                 wordList.get(i).setCode(missingCodes.get(i));
             else wordList.get(i).setCode(++max);
         }
-        wordList.forEach(generatedWords -> wordsRepository.save(generatedWords));
+        wordList.forEach(generatedWords -> {
+            try {
+                wordsRepository.save(generatedWords);
+            } catch (DataIntegrityViolationException e) {
+                fillWordsUp(1);
+            }
+        });
         wordsRepository.flush();
     }
 
@@ -110,14 +137,4 @@ public class WordsSavingService {
         }
     }
 
-    @PostConstruct
-    private void fillMissingTranslates() {
-        List<GeneratedWordsDto> frenchMissingList = wordsRepository.getGeneratedWordsDtoByFrIsNull();
-        new Thread(() ->
-                frenchMissingList.forEach(generatedWordsDto -> {
-                    factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
-                    wordsRepository.save(generatedWordsDto);
-                })
-        ).start();
-    }
 }

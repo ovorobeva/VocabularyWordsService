@@ -34,6 +34,9 @@ public class GeneratedWordsDto {
     @Column (name = "French")
     private String fr;
 
+    @Column (name = "Czech")
+    private String cz;
+
     public GeneratedWordsDto(String en, int code) {
         this.en = en.toLowerCase();
         this.code = code;

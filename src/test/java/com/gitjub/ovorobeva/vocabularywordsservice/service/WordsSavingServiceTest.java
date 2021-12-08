@@ -1,6 +1,7 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.service;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.dao.WordsRepository;
+import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +33,8 @@ class WordsSavingServiceTest {
     }
 
     @Test
-    void fillWordsUpWithMissingWordsTest() {
+    void saveMissingWordsTest() {
         int randomCode = random.nextInt((int) (wordsRepository.count() + 1));
-        System.out.println(randomCode);
         wordsRepository.deleteByCode(randomCode);
         assertThat(wordsRepository.getByCode(randomCode)).isNull();
         ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -43,5 +43,21 @@ class WordsSavingServiceTest {
         while (!executor.isTerminated()) {
         }
         assertThat(wordsRepository.getByCode(randomCode).getCode()).isEqualTo(randomCode);
+    }
+
+    @Test
+    void fillMissingTranslatesTest(){
+        int randomCode = random.nextInt((int) (wordsRepository.count() + 1));
+        GeneratedWordsDto word = wordsRepository.getByCode(randomCode);
+        String currentTranslation = word.getFr();
+        word.setFr(null);
+        wordsRepository.saveAndFlush(word);
+
+       ExecutorService executor = Executors.newFixedThreadPool(1);
+        executor.execute(() -> wordsSavingService.fillMissingTranslates());
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+        }
+        assertThat(wordsRepository.getByCode(randomCode).getFr()).isEqualTo(currentTranslation);
     }
 }
