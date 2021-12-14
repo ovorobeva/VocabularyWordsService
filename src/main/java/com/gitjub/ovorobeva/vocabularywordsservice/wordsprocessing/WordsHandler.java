@@ -1,13 +1,20 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.wordsprocessing;
 
+import com.gitjub.ovorobeva.vocabularywordsservice.emailsender.EmailSender;
+import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
+import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
+import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.Language;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateClient;
+import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateClientCz;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +37,8 @@ public class WordsHandler {
     ProfanityCheckerClient profanityCheckerClient;
     @Autowired
     LemmaClient lemmaClient;
+    @Autowired
+    EmailSender emailSender;
 
 
     public void getProcessedWords(List<GeneratedWordsDto> generatedWordsList,
@@ -74,8 +83,20 @@ public class WordsHandler {
         while (iterator.hasNext()) {
             String addedWord = iterator.next();
             GeneratedWordsDto word = new GeneratedWordsDto(addedWord, lastCode);
-            translate(word);
-            generatedWordsList.add(word);
+            try {
+                translate(word);
+                generatedWordsList.add(word);
+            } catch (GettingTranslateException | InterruptedException | IOException e) {
+                e.printStackTrace();
+            } catch (LimitExceededException | AuthTranslateException e) {
+                System.out.println(e.getMessage());
+                try {
+                    emailSender.sendSimpleMessage(e.getMessage(), e.getMessage());
+                } catch (MailSendException ex) {
+                    ex.printStackTrace();
+                }
+                e.printStackTrace();
+            }
             lastCode++;
         }
 
@@ -121,18 +142,14 @@ public class WordsHandler {
         return isCorrect;
     }
 
-    private void translate(GeneratedWordsDto word){
+    private void translate(GeneratedWordsDto word) throws AuthTranslateException, GettingTranslateException, LimitExceededException, IOException, InterruptedException {
         TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
         TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
+        TranslateClient translateClientCz = factory.getTranslateClient(Language.CZ);
 
         translateClientRu.translateWord(word);
-        Thread frenchThread = new Thread(() -> translateClientFr.translateWord(word));
-        frenchThread.start();
-        try {
-            frenchThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        translateClientFr.translateWord(word);
+        TranslateClientCz.translateWord(word);
     }
 }
 

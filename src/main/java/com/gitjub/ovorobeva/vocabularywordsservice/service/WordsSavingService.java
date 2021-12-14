@@ -1,6 +1,10 @@
 package com.gitjub.ovorobeva.vocabularywordsservice.service;
 
 import com.gitjub.ovorobeva.vocabularywordsservice.dao.WordsRepository;
+import com.gitjub.ovorobeva.vocabularywordsservice.emailsender.EmailSender;
+import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
+import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
+import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.Language;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
@@ -9,9 +13,11 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -31,6 +37,8 @@ public class WordsSavingService {
     WordsHandler wordsHandler;
     @Autowired
     WordsRepository wordsRepository;
+    @Autowired
+    EmailSender emailSender;
 
     private int wordsCount = 0;
 
@@ -69,8 +77,20 @@ public class WordsSavingService {
         ExecutorService executor = Executors.newFixedThreadPool(NEW_LANGUAGES_COUNT);
         executor.execute(() ->
                 frenchMissingList.forEach(generatedWordsDto -> {
-                    factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
-                    wordsRepository.save(generatedWordsDto);
+                    try {
+                        factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
+                        wordsRepository.save(generatedWordsDto);
+                    } catch (GettingTranslateException | InterruptedException | IOException e) {
+                        e.printStackTrace();
+                    } catch (LimitExceededException | AuthTranslateException e) {
+                        System.out.println(e.getMessage());
+                        try {
+                            emailSender.sendSimpleMessage(e.getMessage(), e.getMessage());
+                        } catch (MailSendException ex) {
+                            ex.printStackTrace();
+                        }
+                        e.printStackTrace();
+                    }
                 })
         );
         executor.shutdown();
