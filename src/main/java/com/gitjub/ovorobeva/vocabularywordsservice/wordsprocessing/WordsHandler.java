@@ -7,7 +7,6 @@ import com.gitjub.ovorobeva.vocabularywordsservice.exceptions.LimitExceededExcep
 import com.gitjub.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.Language;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateClient;
-import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateClientCz;
 import com.gitjub.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,11 +144,11 @@ public class WordsHandler {
     private void translate(GeneratedWordsDto word) throws AuthTranslateException, GettingTranslateException, LimitExceededException, IOException, InterruptedException {
         TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
         TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
-        TranslateClient translateClientCz = factory.getTranslateClient(Language.CZ);
+        TranslateClient translateClientCz = factory.getTranslateClient(Language.CS);
 
         translateClientRu.translateWord(word);
         translateClientFr.translateWord(word);
-        TranslateClientCz.translateWord(word);
+        translateClientCz.translateWord(word);
     }
 }
 

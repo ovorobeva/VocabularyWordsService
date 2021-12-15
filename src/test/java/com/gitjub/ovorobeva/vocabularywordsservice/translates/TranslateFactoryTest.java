@@ -23,7 +23,7 @@ class TranslateFactoryTest {
     }
     @Test
     void getTranslateClientCz() {
-        assertThat(translateFactory.getTranslateClient(Language.CZ)).isInstanceOf(TranslateClientCz.class);
+        assertThat(translateFactory.getTranslateClient(Language.CS)).isInstanceOf(TranslateClientCz.class);
     }
     @Test
     void getTranslateClientWrong() {

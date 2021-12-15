@@ -24,7 +24,7 @@ class TranslateClientCzTest {
     void translateWordTest() throws AuthTranslateException, GettingTranslateException, LimitExceededException, IOException, InterruptedException {
         GeneratedWordsDto word = new GeneratedWordsDto("word", 0);
         assertThat(word.getCz()).isNull();
-        translateFactory.getTranslateClient(Language.CZ).translateWord(word);
+        translateFactory.getTranslateClient(Language.CS).translateWord(word);
         assertThat(word.getCz()).isEqualTo("slovo");
     }
 }
