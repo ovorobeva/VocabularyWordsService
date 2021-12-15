@@ -26,7 +26,7 @@ class TranslateFactoryTest {
         assertThat(translateFactory.getTranslateClient(Language.CS)).isInstanceOf(TranslateClientCz.class);
     }
     @Test
-    void getTranslateClientWrong() {
+    void getTranslateClientWrongLanguage() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> translateFactory.getTranslateClient(Language.valueOf("Wrong language")));
 
     }

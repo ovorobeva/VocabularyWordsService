@@ -50,5 +50,5 @@ public abstract class TranslateClient {
             LimitExceededException,
             InterruptedException,
             IOException,
-            AuthTranslateException{}
+            AuthTranslateException {}
 }
