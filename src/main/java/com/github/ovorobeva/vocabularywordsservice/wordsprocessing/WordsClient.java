@@ -28,7 +28,7 @@ public class WordsClient {
     public WordsClient() {
     }
 
-    public List<String> getRandomWords(int wordsCount) throws InterruptedException {
+    protected List<String> getRandomWords(int wordsCount) throws InterruptedException {
 
         final String BASE_URL = "https://api.wordnik.com/v4/";
         final String WORDS_API_KEY = getenv.get("WORDS_API_KEY");

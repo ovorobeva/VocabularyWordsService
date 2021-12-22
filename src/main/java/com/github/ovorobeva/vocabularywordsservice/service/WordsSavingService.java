@@ -9,7 +9,6 @@ import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWord
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
-import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,7 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Service
-@Data
 public class WordsSavingService {
 
     private static final int NEW_LANGUAGES_COUNT = 1;
@@ -79,6 +77,7 @@ public class WordsSavingService {
                 frenchMissingList.forEach(generatedWordsDto -> {
                     try {
                         factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
+                        factory.getTranslateClient(Language.CS).translateWord(generatedWordsDto);
                         wordsRepository.save(generatedWordsDto);
                     } catch (GettingTranslateException | InterruptedException | IOException e) {
                         e.printStackTrace();

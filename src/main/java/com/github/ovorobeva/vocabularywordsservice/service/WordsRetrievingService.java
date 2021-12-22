@@ -2,7 +2,6 @@ package com.github.ovorobeva.vocabularywordsservice.service;
 
 import com.github.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +9,10 @@ import java.util.Random;
 import java.util.Set;
 
 @Service
-@Data
 public class WordsRetrievingService {
     @Autowired
     WordsRepository wordsRepository;
-    private Random random = new Random();
+    private final Random random = new Random();
 
     public void getRandomWords(int wordsCount, Set<GeneratedWordsDto> wordsToReturn) {
         for (byte i = 0; i < wordsCount; i++) {

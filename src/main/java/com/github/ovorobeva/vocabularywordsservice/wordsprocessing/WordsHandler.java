@@ -8,7 +8,6 @@ import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWord
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
@@ -24,20 +23,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-@Data
 public class WordsHandler {
     @Autowired
-    WordsClient wordsClient;
+    private WordsClient wordsClient;
     @Autowired
-    PartsOfSpeechClient partsOfSpeechClient;
+    private PartsOfSpeechClient partsOfSpeechClient;
     @Autowired
-    TranslateFactory factory;
+    private TranslateFactory factory;
     @Autowired
-    ProfanityCheckerClient profanityCheckerClient;
+    private ProfanityCheckerClient profanityCheckerClient;
     @Autowired
-    LemmaClient lemmaClient;
+    private LemmaClient lemmaClient;
     @Autowired
-    EmailSender emailSender;
+    private EmailSender emailSender;
 
 
     public void getProcessedWords(List<GeneratedWordsDto> generatedWordsList,
