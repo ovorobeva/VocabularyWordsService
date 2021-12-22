@@ -8,18 +8,21 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-class LemmaClientTest {
+class ProfanityCheckerClientTest {
 
     @Autowired
-    private LemmaClient lemmaClient;
+    ProfanityCheckerClient profanityCheckerClient;
 
     @Test
-    void getLemmaTest() {
-        assertThat(lemmaClient.getLemma("words")).isEqualTo("word");
+    void isProfanityTestTrue() {
+        assertThat(profanityCheckerClient.isProfanity("shit")).isTrue();
     }
-
     @Test
-    void getLemmaOfSeldomWordTest() {
-        assertThat(lemmaClient.getLemma("seldomwords")).isEqualTo(LemmaClient.SELDOM_WORD);
+    void isProfanityTestFalse() {
+        assertThat(profanityCheckerClient.isProfanity("word")).isFalse();
+    }
+    @Test
+    void isProfanityTestNonExists() {
+        assertThat(profanityCheckerClient.isProfanity("non existing word")).isFalse();
     }
 }

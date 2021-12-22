@@ -18,12 +18,12 @@ import java.util.logging.Level;
 public class ProfanityCheckerClient {
     public boolean isProfanity(String word) {
 
-        final String BASE_URL = "https://www.purgomalum.com/service/containsprofanity?text=";
+        final String BASE_URL = "https://www.purgomalum.com/service/containsprofanity";
 
         WordsClient.logger.log(Level.INFO, "isProfanity: Start checking the word " + word);
 
         URI uri = new DefaultUriBuilderFactory(BASE_URL).builder()
-                .pathSegment(word)
+                .queryParam("text", word)
                 .build();
 
         HttpClient client = HttpClient.newBuilder()
@@ -36,9 +36,9 @@ public class ProfanityCheckerClient {
         try {
             CompletableFuture<HttpResponse<String>> response =
                     client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+            WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.get().uri() + "\n is profanity = " + response.get().body());
 
             if (response.get().statusCode() >= 200 && response.get().statusCode() < 300) {
-                WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.get().uri() + "\n is profanity = " + response.get().body());
                 return response.get().body().equals("true");
             } else if (response.get().statusCode() == 429) {
                 throw new TooManyRequestsException();
