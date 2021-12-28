@@ -28,15 +28,14 @@ import java.util.concurrent.Executors;
 public class WordsSavingService {
 
     private static final int NEW_LANGUAGES_COUNT = 1;
-    private final Object WAITER = new Object();
     @Autowired
-    TranslateFactory factory;
+    private TranslateFactory factory;
     @Autowired
-    WordsHandler wordsHandler;
+    private WordsHandler wordsHandler;
     @Autowired
-    WordsRepository wordsRepository;
+    private WordsRepository wordsRepository;
     @Autowired
-    EmailSender emailSender;
+    private EmailSender emailSender;
 
     private int wordsCount = 0;
 
@@ -95,7 +94,6 @@ public class WordsSavingService {
         executor.shutdown();
         while (!executor.isTerminated()) {
         }
-        System.out.println("translation is finished");
     }
 
     private synchronized void saveMissingWords(int wordsCount,

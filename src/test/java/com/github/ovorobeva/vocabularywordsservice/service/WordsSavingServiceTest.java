@@ -24,6 +24,7 @@ class WordsSavingServiceTest {
     private WordsSavingService wordsSavingService;
     private final Random random = new Random();
 
+
     @Test
     void fillWordsUpTest() {
         int countBefore = (int) wordsRepository.count();
