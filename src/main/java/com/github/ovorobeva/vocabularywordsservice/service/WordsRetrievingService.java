@@ -27,7 +27,6 @@ public class WordsRetrievingService {
     }
 
     private GeneratedWordsDto getWord(int id) {
-        //todo: to place logger
         System.out.println("getting word with id = " + id);
         int size = (int) wordsRepository.count();
         if (wordsRepository.findByCode(id).isEmpty()) {

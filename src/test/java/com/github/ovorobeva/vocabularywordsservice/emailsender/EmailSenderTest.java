@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
-import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.List;
 
@@ -20,7 +19,7 @@ class EmailSenderTest {
     private EmailSender emailSender;
 
     @Test
-    public void testEmail() throws InterruptedException, MessagingException {
+    public void testEmail() {
         try {
             SimpleSmtpServer server = SimpleSmtpServer.start(3025);
             emailSender.sendSimpleMessage("test subject", "test message", true);
