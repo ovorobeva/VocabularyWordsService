@@ -43,7 +43,7 @@ class ControllerTest {
     }
 
     @AfterEach
-    void afterAll() {
+    void afterEach() {
         wordsRepository.deleteAll();
     }
 }

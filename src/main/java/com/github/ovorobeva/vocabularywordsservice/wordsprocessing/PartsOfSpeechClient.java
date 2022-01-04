@@ -57,12 +57,10 @@ public class PartsOfSpeechClient {
                     }
                 }
                 WordsClient.logger.log(Level.INFO, "execute. Response to process is: " + partsOfSpeech);
-            } else if (response.get().statusCode() == 429) {
+            } else if (response.get().statusCode() == 429 || response.get().statusCode() == 503 || response.get().statusCode() == 405) {
                 throw new TooManyRequestsException();
             } else if (response.get().statusCode() == 404) {
                 return null;
-            } else if (response.get().statusCode() == 405) {
-                return getPartsOfSpeech(word);
             } else
                 WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + response.get().uri() + " . Error code is: " + response.get().statusCode());
         } catch (IllegalStateException | ExecutionException e) {

@@ -44,7 +44,7 @@ class WordsRetrievingServiceTest {
         assertThat(wordsToReturn).size().isEqualTo(count);
     }
     @AfterEach
-    void afterAll() {
+    void afterEach() {
         wordsRepository.deleteAll();
     }
 }
