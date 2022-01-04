@@ -49,6 +49,7 @@ public class GeneratedWordsDto {
                 ", en='" + en + '\'' +
                 ", ru='" + ru + '\'' +
                 ", fr='" + fr + '\'' +
+                ", cz='" + cz + '\'' +
                 ", code=" + code +
                 '}';
     }

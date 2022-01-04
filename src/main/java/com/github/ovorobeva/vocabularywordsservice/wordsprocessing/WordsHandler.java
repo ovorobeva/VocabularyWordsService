@@ -36,11 +36,13 @@ public class WordsHandler {
     private LemmaClient lemmaClient;
     @Autowired
     private EmailSender emailSender;
+    private int defWordCount = 0;
 
 
     public void getProcessedWords(List<GeneratedWordsDto> generatedWordsList,
                                   int wordsCount,
                                   int lastCode) throws InterruptedException {
+        if (defWordCount == 0) defWordCount = wordsCount;
         List<String> words = wordsClient.getRandomWords(wordsCount);
         List<String> checkedWords = new ArrayList<>();
         Iterator<String> iterator = words.iterator();
@@ -97,8 +99,8 @@ public class WordsHandler {
             lastCode++;
         }
 
-        if (generatedWordsList.size() < wordsCount) {
-            wordsCount = wordsCount - generatedWordsList.size();
+        if (generatedWordsList.size() < defWordCount) {
+            wordsCount = defWordCount - generatedWordsList.size();
             getProcessedWords(generatedWordsList, wordsCount, lastCode);
         }
     }

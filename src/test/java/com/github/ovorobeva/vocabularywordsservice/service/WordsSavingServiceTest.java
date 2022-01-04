@@ -4,6 +4,7 @@ import com.github.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,28 +20,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext
 class WordsSavingServiceTest {
 
+    private final Random random = new Random();
     @Autowired
     private WordsRepository wordsRepository;
     @Autowired
     private WordsSavingService wordsSavingService;
-    private final Random random = new Random();
+
+    @BeforeEach
+    void before() {
+        if (wordsRepository.count() == 0)
+            wordsSavingService.fillWordsUp(20);
+    }
 
 
     @Test
     void fillWordsUpTest() {
-/*
-        int countBefore = (int) wordsRepository.count();
-        int countForFill = random.nextInt(10) + 1;
-        wordsSavingService.fillWordsUp(countForFill);
-        assertThat(wordsRepository.count()).isCloseTo(countBefore + countForFill, Percentage.withPercentage(10.0));
-*/
         assertThat(wordsRepository.count()).isCloseTo(20, Percentage.withPercentage(10.0));
 
     }
 
     @Test
     void saveMissingWordsTest() {
-        int randomCode = random.nextInt((int) (wordsRepository.count() + 1));
+        int randomCode = random.nextInt((int) (wordsRepository.count())) + 1;
         wordsRepository.deleteByCode(randomCode);
         assertThat(wordsRepository.getByCode(randomCode)).isNull();
         ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -52,19 +53,23 @@ class WordsSavingServiceTest {
     }
 
     @Test
-    void fillMissingTranslatesTest(){
-        int randomCode = random.nextInt((int) (wordsRepository.count() + 1));
+    synchronized void fillMissingTranslatesTest() {
+        int randomCode = random.nextInt((int) (wordsRepository.count())) + 1;
         GeneratedWordsDto word = wordsRepository.getByCode(randomCode);
-        String currentTranslation = word.getFr();
+        String currentTranslationFr = word.getFr();
+        String currentTranslationCz = word.getCz();
         word.setFr(null);
+        word.setCz(null);
         wordsRepository.saveAndFlush(word);
 
-       ExecutorService executor = Executors.newFixedThreadPool(1);
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.execute(() -> wordsSavingService.fillMissingTranslates());
         executor.shutdown();
         while (!executor.isTerminated()) {
         }
-        assertThat(wordsRepository.getByCode(randomCode).getFr()).isEqualTo(currentTranslation);
+        System.out.println(wordsRepository.getByCode(randomCode) + "\n french before = " + currentTranslationFr + " \n czech before = " + currentTranslationCz);
+        assertThat(wordsRepository.getByCode(randomCode).getFr()).isEqualTo(currentTranslationFr);
+        assertThat(wordsRepository.getByCode(randomCode).getCz()).isEqualTo(currentTranslationCz);
     }
 
     @AfterEach

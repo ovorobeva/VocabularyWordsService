@@ -17,6 +17,7 @@ public interface WordsRepository extends JpaRepository<GeneratedWordsDto, Intege
     int[] getCodes();
 
     List<GeneratedWordsDto> getGeneratedWordsDtoByFrIsNull();
+    List<GeneratedWordsDto> getGeneratedWordsDtoByCzIsNull();
 
     @Transactional
     void deleteByCode(int code);
