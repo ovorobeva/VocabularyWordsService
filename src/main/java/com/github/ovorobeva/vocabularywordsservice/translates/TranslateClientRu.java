@@ -14,7 +14,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.logging.Level;
 
-//todo: to make constants env
 @Service
 public class TranslateClientRu extends TranslateClient {
     @Override

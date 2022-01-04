@@ -19,5 +19,10 @@ class VocabularyWordsServiceApplicationTests {
     void contextLoads() {
         assertThat(controller).isNotNull();
     }
+    //todo: to replace logger with log4j
+    //todo: to make readme
+    //todo: to make a documentation
+    //todo: to start tests from docker
+    //todo: to add languages into android project itself
 
 }
