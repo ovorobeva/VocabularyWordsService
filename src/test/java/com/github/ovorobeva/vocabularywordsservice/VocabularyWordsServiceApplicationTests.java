@@ -24,5 +24,7 @@ class VocabularyWordsServiceApplicationTests {
     //todo: to make a documentation
     //todo: to start tests from docker
     //todo: to add languages into android project itself
+    //todo: to make mocks for clients
+    //todo: to handle wrong requests in controller
 
 }
