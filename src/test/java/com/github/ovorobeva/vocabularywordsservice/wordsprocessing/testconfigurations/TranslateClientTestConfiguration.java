@@ -1,4 +1,4 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
+package com.github.ovorobeva.vocabularywordsservice.wordsprocessing.testconfigurations;
 
 import com.github.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
@@ -9,7 +9,7 @@ import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import java.io.IOException;
 
 
-class TranslateClientTestConfiguration extends TranslateClient {
+public class TranslateClientTestConfiguration extends TranslateClient {
 
     @Override
     public void translateWord(GeneratedWordsDto word) throws GettingTranslateException, LimitExceededException, InterruptedException, IOException, AuthTranslateException {

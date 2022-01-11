@@ -22,7 +22,7 @@ class EmailSenderTest {
     public void testEmail() {
         try {
             SimpleSmtpServer server = SimpleSmtpServer.start(3025);
-            emailSender.sendSimpleMessage("test subject", "test message", true);
+            emailSender.sendSimpleMessage("test subject", "test message");
             List<SmtpMessage> emails = server.getReceivedEmails();
             server.stop();
             assertThat(emails).hasSize(1);
@@ -33,7 +33,6 @@ class EmailSenderTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
 
     }

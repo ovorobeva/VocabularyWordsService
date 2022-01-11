@@ -83,7 +83,7 @@ public class WordsSavingService {
                     } catch (LimitExceededException | AuthTranslateException e) {
                         System.out.println(e.getMessage());
                         try {
-                            emailSender.sendSimpleMessage(e.getMessage(), e.getMessage(), false);
+                            emailSender.sendSimpleMessage(e.getMessage(), e.getMessage());
                         } catch (MailSendException ex) {
                             ex.printStackTrace();
                         }

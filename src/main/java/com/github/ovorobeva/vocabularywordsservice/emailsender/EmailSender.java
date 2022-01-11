@@ -11,20 +11,17 @@ import org.springframework.stereotype.Component;
 public class EmailSender {
     @Value("${spring.mail.username}")
     public String TO;
+
     @Autowired
     private JavaMailSenderImpl emailSender;
 
-    public void sendSimpleMessage(String subject, String text, boolean isTest) throws MailSendException {
+    public void sendSimpleMessage(String subject, String text) throws MailSendException {
         SimpleMailMessage message = new SimpleMailMessage();
         String FROM = "noreply@vocabularywordsservice.com";
         message.setFrom(FROM);
         message.setTo(TO);
         message.setSubject(subject);
         message.setText(text);
-        if (isTest){
-            emailSender.setPort(3025);
-            emailSender.setHost("localhost");
-        }
         emailSender.send(message);
     }
 }

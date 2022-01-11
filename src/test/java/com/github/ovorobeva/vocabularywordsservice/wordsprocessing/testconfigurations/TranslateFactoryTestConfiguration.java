@@ -1,5 +1,6 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
+package com.github.ovorobeva.vocabularywordsservice.wordsprocessing.testconfigurations;
 
+import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,11 +9,11 @@ import org.springframework.context.annotation.Profile;
 
 @Profile("test")
 @Configuration
-class WordsClientTestConfiguration {
+class TranslateFactoryTestConfiguration {
 
     @Bean
     @Primary
-    public WordsClient wordsClient() {
-        return Mockito.mock(WordsClient.class);
+    public TranslateFactory translateFactory() {
+        return Mockito.mock(TranslateFactory.class);
     }
 }

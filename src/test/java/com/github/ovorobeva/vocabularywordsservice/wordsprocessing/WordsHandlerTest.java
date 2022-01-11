@@ -2,6 +2,7 @@ package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
+import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.testconfigurations.TranslateClientTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalAnswers;
@@ -51,7 +52,7 @@ class WordsHandlerTest {
                 "nine",
                 "ten",
                 "eleven"};
-        count = random.nextInt(10) + 1;
+        count = random.nextInt(10) + 2;
         List<String> mockedList = new ArrayList<>(Arrays.asList(WORDS).subList(0, count));
         Mockito.when(wordsClient.getRandomWords(Mockito.anyInt())).thenReturn(mockedList);
 
