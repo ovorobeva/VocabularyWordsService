@@ -70,9 +70,9 @@ class WordsHandlerTest {
         wordsHandler.getProcessedWords(wordList, count, lastCode);
         assertThat(wordList).hasSize(count);
         assertThat(wordList.get(count - 1).getCode()).isEqualTo(lastCode + count - 1);
-        assertThat(wordList.get(random.nextInt(count - 1) + 1).getFr()).isNotNull();
-        assertThat(wordList.get(random.nextInt(count - 1) + 1).getRu()).isNotNull();
-        assertThat(wordList.get(random.nextInt(count - 1) + 1).getCz()).isNotNull();
+        assertThat(wordList.get(random.nextInt(count - 1) + 1).getFr()).containsSequence("Fr");
+        assertThat(wordList.get(random.nextInt(count - 1) + 1).getRu()).containsSequence("Ru");
+        assertThat(wordList.get(random.nextInt(count - 1) + 1).getCz()).containsSequence("Cz");
         assertThat(wordList.get(random.nextInt(count - 1) + 1).getEn()).isNotNull();
     }
 }
