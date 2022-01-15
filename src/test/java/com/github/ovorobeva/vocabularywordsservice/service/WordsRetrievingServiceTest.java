@@ -27,7 +27,7 @@ class WordsRetrievingServiceTest {
 
     @BeforeEach
     void before() {
-        if (wordsRepository.count() == 0)
+        if (wordsRepository.count() < 20)
             wordsSavingService.fillWordsUp(20);
         for (int i = 0; i <= 8; i += 2){
             System.out.println(wordsRepository.findByCode(i) + "\n");

@@ -11,6 +11,7 @@ import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,8 @@ public class WordsSavingService {
     private WordsRepository wordsRepository;
     @Autowired
     private EmailSender emailSender;
+    @Value("${default.words.count}")
+    int defaultWordCount;
 
     private int wordsCount = 0;
 
@@ -148,7 +151,7 @@ public class WordsSavingService {
     private void defaultFillUp() {
         if (wordsCount == 0) {
             if (wordsRepository.count() == 0) {
-                wordsCount = Integer.parseInt(System.getenv().get("DEFAULT_WORD_COUNT"));
+                wordsCount = defaultWordCount;
                 fillWordsUp(wordsCount);
             }
         }

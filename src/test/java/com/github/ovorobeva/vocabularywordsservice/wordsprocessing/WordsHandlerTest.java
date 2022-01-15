@@ -63,9 +63,7 @@ class WordsHandlerTest {
     }
 
     @Test
-    void getProcessedWords() throws InterruptedException {
-
-
+    void getProcessedWordsTest() throws InterruptedException {
         int lastCode = random.nextInt(10);
         List<GeneratedWordsDto> wordList = new ArrayList<>();
         wordsHandler.getProcessedWords(wordList, count, lastCode);

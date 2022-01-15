@@ -31,7 +31,7 @@ class ControllerTest {
 
     @BeforeEach
     void before() {
-        if (wordsRepository.count() == 0)
+        if (wordsRepository.count() < 20)
             wordsSavingService.fillWordsUp(20);
     }
 

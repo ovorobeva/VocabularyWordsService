@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -26,16 +27,19 @@ class WordsSavingServiceTest {
     @Autowired
     private WordsSavingService wordsSavingService;
 
+    @Value("${default.words.count}")
+    int defaultWordCount;
+
     @BeforeEach
     void before() {
-        if (wordsRepository.count() == 0)
-            wordsSavingService.fillWordsUp(20);
+        if (wordsRepository.count() < defaultWordCount)
+            wordsSavingService.fillWordsUp(defaultWordCount);
     }
 
 
     @Test
     void fillWordsUpTest() {
-        assertThat(wordsRepository.count()).isCloseTo(20, Percentage.withPercentage(10.0));
+        assertThat(wordsRepository.count()).isCloseTo(defaultWordCount, Percentage.withPercentage(10.0));
 
     }
 
