@@ -35,7 +35,7 @@ public class WordsRetrievingService {
             id = random.nextInt(size);
             return getWord(id);
         } else{
-            System.out.println("Returning thw word " + wordsRepository.findByCode(id).get());
+            System.out.println("Returning the word " + wordsRepository.findByCode(id).get());
             return wordsRepository.findByCode(id).get();}
     }
 }

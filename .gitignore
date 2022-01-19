@@ -34,3 +34,4 @@ build/
 !/.idea/
 !/VocabularyWordsService.iml
 !/.env
+/logs/
