@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ public class Controller {
     public ResponseEntity<Set<GeneratedWordsDto>> getWords(@PathVariable int count) {
         Set<GeneratedWordsDto> generatedWordList = new HashSet<>(count);
         wordsRetrievingService.getRandomWords(count, generatedWordList);
+        if (generatedWordList.isEmpty()) throw new EntityNotFoundException("Words are not found");
         Thread fillingThread = new Thread(() -> {
             wordsSavingService.fillWordsUp(wordCount);
         });
