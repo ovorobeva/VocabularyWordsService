@@ -21,7 +21,7 @@ import java.util.Set;
 @Log4j2
 public class Controller {
 
-    Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
     @Autowired
     private WordsSavingService wordsSavingService;
     @Value("${default.words.count}")

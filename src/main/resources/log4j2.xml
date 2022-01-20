@@ -9,7 +9,7 @@
 
         <RollingFile name="RollingFile"
                      fileName="./logs/spring-boot-logger-log4j2.log"
-                     filePattern="./logs/$${date:yyyy-MM}/spring-boot-logger-log4j2-%d{-dd-MMMM-yyyy}-%i.log.gz">
+                     filePattern="./logs/$${date:yyyy-MM}/log-%d{-dd-MMMM-yyyy}-%i.log">
             <PatternLayout>
                 <pattern>%d %p %C{1.} [%t] %m%n</pattern>
             </PatternLayout>
@@ -26,15 +26,13 @@
     </Appenders>
 
     <Loggers>
-        <!-- LOG everything at INFO level -->
         <Root level="info">
             <AppenderRef ref="Console" />
             <AppenderRef ref="RollingFile" />
             <AppenderRef ref="Syslog" />
         </Root>
 
-        <!-- LOG "com.baeldung*" at TRACE level -->
-        <Logger name="com.github.ovorobeva.vocabularywordsservice.controller" level="info" >
+        <Logger name="com.github.ovorobeva.vocabularywordsservice.controller" level="debug" >
             <AppenderRef ref="Console" />
             <AppenderRef ref="RollingFile" />
         </Logger>

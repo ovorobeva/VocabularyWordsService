@@ -10,6 +10,8 @@ import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
 import lombok.SneakyThrows;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -40,6 +42,7 @@ public class WordsSavingService {
     @Value("${default.words.count}")
     int defaultWordCount;
 
+    protected final Logger logger = LogManager.getLogger();
     private int wordsCount = 0;
 
     public synchronized void fillWordsUp(int wordsCount) {
@@ -84,7 +87,7 @@ public class WordsSavingService {
                     } catch (GettingTranslateException | InterruptedException | IOException e) {
                         e.printStackTrace();
                     } catch (LimitExceededException | AuthTranslateException e) {
-                        System.out.println(e.getMessage());
+                        logger.error(e.getMessage());
                         try {
                             emailSender.sendSimpleMessage(e.getMessage(), e.getMessage());
                         } catch (MailSendException ex) {

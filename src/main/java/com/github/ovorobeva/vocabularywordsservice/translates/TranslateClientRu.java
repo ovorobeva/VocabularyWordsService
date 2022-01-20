@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.logging.Level;
 
 @Service
 public class TranslateClientRu extends TranslateClient {
@@ -33,13 +32,13 @@ public class TranslateClientRu extends TranslateClient {
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            TranslateClientRu.logger.log(Level.INFO, "execute: URL is: " + response.uri()
+            logger.debug("execute: URL is: " + response.uri()
                     + "\nstatus code is: " + response.statusCode()
                     + "response is: " + response.body());
             if(TranslateClient.isSuccess(response.statusCode())) {
                 assert response.body() != null;
                 word.setRu(converter.fromJson(response.body(), TranslateDto.class).getTranslations().get(0).getText().toLowerCase());
-                TranslateClientRu.logger.log(Level.INFO, "execute: Translate for the word " + word.getEn() + " is: " + word.getRu());
+                logger.info("execute: Translate for the word " + word.getEn() + " is: " + word.getRu());
             }
         } catch (TooManyRequestsException e) {
             Thread.sleep(10000);

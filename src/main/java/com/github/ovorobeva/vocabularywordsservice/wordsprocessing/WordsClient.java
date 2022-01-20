@@ -3,6 +3,8 @@ package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.words.RandomWordsDto;
 import com.google.gson.Gson;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -15,15 +17,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Service
 public class WordsClient {
 
     private static final Map<String, String> getenv = System.getenv();
     private static final String TAG = "Custom logs";
-    public static Logger logger = Logger.getLogger(TAG);
+    protected final Logger logger = LogManager.getLogger();
 
     public WordsClient() {
     }
@@ -96,12 +96,12 @@ public class WordsClient {
                     returnedWords++;
                     words.add(converter.fromJson(message.toString(), RandomWordsDto.class).getWord());
                 }
-                WordsClient.logger.log(Level.INFO, "execute. URL is: " + response.uri());
-                WordsClient.logger.log(Level.INFO, "execute. Response to process is: " + words);
+                logger.info("execute. URL is: " + response.uri());
+                logger.info("execute. Response to process is: " + words);
             } else if (response.statusCode() == 429) {
                 throw new TooManyRequestsException();
             } else
-                WordsClient.logger.log(Level.SEVERE, "There is an error during request by link " + request.uri() + " . Error code is: " + response.statusCode());
+                logger.error("There is an error during request by link " + request.uri() + " . Error code is: " + response.statusCode());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (TooManyRequestsException e) {

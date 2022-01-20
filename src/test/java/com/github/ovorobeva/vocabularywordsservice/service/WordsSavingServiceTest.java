@@ -71,7 +71,6 @@ class WordsSavingServiceTest {
         executor.shutdown();
         while (!executor.isTerminated()) {
         }
-        System.out.println(wordsRepository.getByCode(randomCode) + "\n french before = " + currentTranslationFr + " \n czech before = " + currentTranslationCz);
         assertThat(wordsRepository.getByCode(randomCode).getFr()).isEqualTo(currentTranslationFr);
         assertThat(wordsRepository.getByCode(randomCode).getCz()).isEqualTo(currentTranslationCz);
     }
