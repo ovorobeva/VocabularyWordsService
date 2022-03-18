@@ -31,12 +31,15 @@ public class GeneratedWordsDto {
     private String en;
 
     @Column (name = "Russian")
+    @NotNull(message = "Russian translation cannot be null")
     private String ru;
 
     @Column (name = "French")
+    @NotNull(message = "French translation cannot be null")
     private String fr;
 
     @Column (name = "Czech")
+    @NotNull(message = "Czech translation cannot be null")
     private String cz;
 
     public GeneratedWordsDto(String en, int code) {
