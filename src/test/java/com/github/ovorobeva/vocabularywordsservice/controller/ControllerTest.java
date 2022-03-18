@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 import java.util.Random;
@@ -18,7 +17,6 @@ import java.util.Random;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext
 class ControllerTest {
     @LocalServerPort
     private int port;
@@ -44,7 +42,7 @@ class ControllerTest {
     }
     @Test
     void getWordsWrongTest() {
-        assertThat(this.restTemplate.getForEntity("http://localhost:" + port + "/getwords/", String.class).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(this.restTemplate.getForEntity("http://localhost:" + port + "/getwords/a", String.class).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @AfterEach
