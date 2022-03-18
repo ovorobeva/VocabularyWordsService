@@ -3,6 +3,7 @@ package com.github.ovorobeva.vocabularywordsservice.model.generated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.test.annotation.DirtiesContext;
 
 import javax.persistence.*;
@@ -21,6 +22,7 @@ public class GeneratedWordsDto {
     private int id;
 
     @Column (name = "Code")
+    @UniqueElements
     @NotNull(message = "Code cannot be null")
     private int code;
 
@@ -59,12 +61,12 @@ public class GeneratedWordsDto {
         if (this == o) return true;
         if (!(o instanceof GeneratedWordsDto)) return false;
         GeneratedWordsDto that = (GeneratedWordsDto) o;
-        return getEn().equals(that.getEn()) && getRu().equals(that.getRu());
+        return getCode() == that.getCode() && getEn().equals(that.getEn()) && Objects.equals(getRu(), that.getRu()) && Objects.equals(getFr(), that.getFr()) && Objects.equals(getCz(), that.getCz());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getEn(), getRu());
+        return Objects.hash(getCode(), getEn(), getRu(), getFr(), getCz());
     }
 }
 

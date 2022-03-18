@@ -1,6 +1,6 @@
 package com.github.ovorobeva.vocabularywordsservice.emailsender;
 
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSendException;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 
 @Component
-@Log4j2
+@Slf4j
 public class EmailSender {
     @Value("${spring.mail.username}")
     public String TO;

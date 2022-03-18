@@ -3,8 +3,7 @@ package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.words.RandomWordsDto;
 import com.google.gson.Gson;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -19,11 +18,11 @@ import java.net.http.HttpResponse;
 import java.util.*;
 
 @Service
+@Log4j2
 public class WordsClient {
 
     private static final Map<String, String> getenv = System.getenv();
     private static final String TAG = "Custom logs";
-    protected final Logger logger = LogManager.getLogger();
 
     public WordsClient() {
     }
@@ -96,12 +95,12 @@ public class WordsClient {
                     returnedWords++;
                     words.add(converter.fromJson(message.toString(), RandomWordsDto.class).getWord());
                 }
-                logger.info("execute. URL is: " + response.uri());
-                logger.info("execute. Response to process is: " + words);
+                log.info("execute. URL is: " + response.uri());
+                log.info("execute. Response to process is: " + words);
             } else if (response.statusCode() == 429) {
                 throw new TooManyRequestsException();
             } else
-                logger.error("There is an error during request by link " + request.uri() + " . Error code is: " + response.statusCode());
+                log.error("There is an error during request by link " + request.uri() + " . Error code is: " + response.statusCode());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (TooManyRequestsException e) {

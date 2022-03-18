@@ -6,8 +6,7 @@ import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaDto;
 import com.google.gson.Gson;
 import lombok.Data;
 import lombok.SneakyThrows;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -22,8 +21,8 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 @Data
+@Slf4j
 public class LemmaClient {
-    private final Logger logger = LogManager.getLogger();
 
     public static final String SELDOM_WORD = "Word is not in use";
 
@@ -32,7 +31,7 @@ public class LemmaClient {
 
         final String BASE_URL = "https://try.expert.ai/analysis/standard/en/disambiguation";
 
-        logger.info("setLemma: Searching for the lemma for the word " + word);
+        log.info("setLemma: Searching for the lemma for the word " + word);
 
         URI uri = new DefaultUriBuilderFactory(BASE_URL).builder()
                 .build();
@@ -64,19 +63,19 @@ public class LemmaClient {
                 if (message.getSyncon() == -1)
                     return SELDOM_WORD;
 
-                logger.info("execute. URL is: " + response.get().uri() + "\n lemma response is " + message.getLemma());
+                log.info("execute. URL is: " + response.get().uri() + "\n lemma response is " + message.getLemma());
                 return message.getLemma();
             } else if (response.get().statusCode() == 429) {
                 throw new TooManyRequestsException();
             } else {
-                logger.error("There is an error during request by link " + response.get().uri()
+                log.error("There is an error during request by link " + response.get().uri()
                         + " . Error code is: " + response.get().statusCode()
                         + ". Error is: " + response.get().body());
                 return word;
             }
         } catch (IllegalStateException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
-            logger.error("There is an error during request by link " + request.uri() + e.getMessage());
+            log.error("There is an error during request by link " + request.uri() + e.getMessage());
             return word;
         } catch (TooManyRequestsException e) {
             try {

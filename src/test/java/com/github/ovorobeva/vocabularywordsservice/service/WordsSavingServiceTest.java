@@ -2,7 +2,6 @@ package com.github.ovorobeva.vocabularywordsservice.service;
 
 import com.github.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
-import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +37,6 @@ class WordsSavingServiceTest {
 
 
     @Test
-    void fillWordsUpTest() {
-        assertThat(wordsRepository.count()).isCloseTo(defaultWordCount, Percentage.withPercentage(10.0));
-
-    }
-
-    @Test
     void saveMissingWordsTest() {
         int randomCode = random.nextInt((int) (wordsRepository.count())) + 1;
         wordsRepository.deleteByCode(randomCode);
@@ -57,7 +50,7 @@ class WordsSavingServiceTest {
     }
 
     @Test
-    synchronized void fillMissingTranslatesTest() {
+    synchronized void fillMissingTranslatesTest() throws InterruptedException {
         int randomCode = random.nextInt((int) (wordsRepository.count())) + 1;
         GeneratedWordsDto word = wordsRepository.getByCode(randomCode);
         String currentTranslationFr = word.getFr();
@@ -69,8 +62,7 @@ class WordsSavingServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.execute(() -> wordsSavingService.fillMissingTranslates());
         executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
+        Thread.sleep(10000);
         assertThat(wordsRepository.getByCode(randomCode).getFr()).isEqualTo(currentTranslationFr);
         assertThat(wordsRepository.getByCode(randomCode).getCz()).isEqualTo(currentTranslationCz);
     }

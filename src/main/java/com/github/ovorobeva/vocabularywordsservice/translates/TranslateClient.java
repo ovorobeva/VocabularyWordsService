@@ -6,8 +6,7 @@ import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededExcep
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.google.gson.Gson;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
@@ -18,9 +17,9 @@ import java.net.http.HttpRequest;
 import java.util.Locale;
 
 @Service
+@Slf4j
 public abstract class TranslateClient {
 
-    protected final Logger logger = LogManager.getLogger();
     protected final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
             .header("Content-Type", "application/json");
     protected final HttpClient client = HttpClient.newBuilder()

@@ -8,8 +8,7 @@ import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWord
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
@@ -24,9 +23,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class WordsHandler {
 
-    protected final Logger logger = LogManager.getLogger();
+//    protected final log log = LogManager.getlog();
 
     @Autowired
     private WordsClient wordsClient;
@@ -49,59 +49,53 @@ public class WordsHandler {
         if (defWordCount == 0) defWordCount = wordsCount;
         List<String> words = wordsClient.getRandomWords(wordsCount);
         List<String> checkedWords = new ArrayList<>();
+        List<GeneratedWordsDto> wordsToAdd = new ArrayList<>();
         Iterator<String> iterator = words.iterator();
 
-        logger.debug("getWords: Starting removing non-matching words from the list \n" + words);
+        log.debug("getWords: Starting removing non-matching words from the list \n" + words);
 
-        ExecutorService executor = Executors.newFixedThreadPool(wordsCount);
+        List<ExecutorService> executors = new ArrayList<>();
         while (iterator.hasNext()) {
             String word = iterator.next();
             Pattern pattern = Pattern.compile("[^a-zA-Z[-]]");
 
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executors.add(executor);
             executor.execute(() -> {
                 Matcher matcher = pattern.matcher(word);
                 String lemma;
                 if (matcher.find()) {
-                    logger.info("getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
+                    log.info("getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
                 } else {
                     lemma = lemmaClient.getLemma(word);
                     if (lemma.equals(LemmaClient.SELDOM_WORD)) {
-                        logger.info("getWords: Removing the word " + lemma + " because of its never using.");
+                        log.info("getWords: Removing the word " + lemma + " because of its never using.");
                     } else if (!isPartOfSpeechCorrect(lemma)) {
-                        logger.info("getWords: Removing the word " + lemma + " because of the wrong part of speech.");
+                        log.info("getWords: Removing the word " + lemma + " because of the wrong part of speech.");
                     } else if (profanityCheckerClient.isProfanity(lemma)) {
-                        logger.info("getWords: Removing the word " + lemma + " because of profanity.");
+                        log.info("getWords: Removing the word " + lemma + " because of profanity.");
                     } else {
                         checkedWords.add(lemma);
+                        GeneratedWordsDto generatedWord = new GeneratedWordsDto(lemma, 0);
+                        translateWord(generatedWord);
+                        //todo: to check if translation is missing
+                        wordsToAdd.add(generatedWord);
                     }
                 }
             });
         }
 
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
-
-        iterator = checkedWords.iterator();
-        while (iterator.hasNext()) {
-            String addedWord = iterator.next();
-            GeneratedWordsDto word = new GeneratedWordsDto(addedWord, lastCode);
-            try {
-                translate(word);
-                generatedWordsList.add(word);
-            } catch (GettingTranslateException | InterruptedException | IOException e) {
-                e.printStackTrace();
-            } catch (LimitExceededException | AuthTranslateException e) {
-                logger.error(e.getMessage());
-                try {
-                    emailSender.sendSimpleMessage(e.getMessage(), e.getMessage());
-                } catch (MailSendException ex) {
-                    ex.printStackTrace();
-                }
-                e.printStackTrace();
+        executors.forEach(executor -> {
+            executor.shutdown();
+            while (!executor.isTerminated()) {
             }
+        });
+
+        for (GeneratedWordsDto addedWord : wordsToAdd) {
+            addedWord.setCode(lastCode);
             lastCode++;
         }
+        generatedWordsList.addAll(wordsToAdd);
 
         if (generatedWordsList.size() < defWordCount) {
             wordsCount = defWordCount - generatedWordsList.size();
@@ -109,8 +103,24 @@ public class WordsHandler {
         }
     }
 
+    private void translateWord(GeneratedWordsDto word) {
+        try {
+            translate(word);
+        } catch (GettingTranslateException | InterruptedException | IOException e) {
+            e.printStackTrace();
+        } catch (LimitExceededException | AuthTranslateException e) {
+            log.error(e.getMessage());
+            try {
+                emailSender.sendSimpleMessage(e.getMessage(), e.getMessage());
+            } catch (MailSendException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+        }
+    }
+
     private boolean isPartOfSpeechCorrect(String word) {
-        logger.info("isPartOfSpeechCorrect: the word " + word + " is being checked");
+        log.info("isPartOfSpeechCorrect: the word " + word + " is being checked");
         boolean isCorrect = true;
         List<String> partsOfSpeech = null;
         try {
@@ -119,7 +129,7 @@ public class WordsHandler {
             e.printStackTrace();
         }
 
-        logger.debug("isPartOfSpeechCorrect: parts of speech for the word " + word + " are: " + partsOfSpeech);
+        log.debug("isPartOfSpeechCorrect: parts of speech for the word " + word + " are: " + partsOfSpeech);
 
         if (partsOfSpeech == null || partsOfSpeech.isEmpty()) {
             return false;
@@ -137,7 +147,7 @@ public class WordsHandler {
                     "|adverb" +
                     "|idiom" +
                     "|past-participle") || partOfSpeech.isEmpty()) {
-                logger.info("isPartOfSpeechCorrect: The word " + word + " is to be removed because of part of speech: " + partOfSpeech);
+                log.info("isPartOfSpeechCorrect: The word " + word + " is to be removed because of part of speech: " + partOfSpeech);
                 isCorrect = false;
                 break;
             }

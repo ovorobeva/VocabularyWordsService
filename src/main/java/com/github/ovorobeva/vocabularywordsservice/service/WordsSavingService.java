@@ -9,13 +9,13 @@ import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWord
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
-import lombok.SneakyThrows;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.MailSendException;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -28,9 +28,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Service
+@EnableScheduling
+@Slf4j
 public class WordsSavingService {
 
-    private static final int NEW_LANGUAGES_COUNT = 1;
+    @Value("${default.words.count}")
+    int defaultWordCount;
+
+    int notSaved = 0;
+
     @Autowired
     private TranslateFactory factory;
     @Autowired
@@ -39,14 +45,8 @@ public class WordsSavingService {
     private WordsRepository wordsRepository;
     @Autowired
     private EmailSender emailSender;
-    @Value("${default.words.count}")
-    int defaultWordCount;
-
-    protected final Logger logger = LogManager.getLogger();
-    private int wordsCount = 0;
 
     public synchronized void fillWordsUp(int wordsCount) {
-        this.wordsCount = wordsCount;
         int[] codes = wordsRepository.getCodes();
         int recordsCount = codes.length;
         int code;
@@ -64,8 +64,9 @@ public class WordsSavingService {
             wordList.forEach(generatedWords -> {
                 try {
                     wordsRepository.save(generatedWords);
-                } catch (DataIntegrityViolationException e) {
-                    fillWordsUp(1);
+                } catch (DataIntegrityViolationException e){
+                    notSaved++;
+                    log.error(e.getMessage());
                 }
             });
             wordsRepository.flush();
@@ -73,21 +74,19 @@ public class WordsSavingService {
             saveMissingWords(wordsCount, recordsCount, max, codes);
     }
 
-    @SneakyThrows
     @PostConstruct
     public synchronized void fillMissingTranslates() {
         List<GeneratedWordsDto> frenchMissingList = wordsRepository.getGeneratedWordsDtoByFrIsNull();
-        ExecutorService executor = Executors.newFixedThreadPool(NEW_LANGUAGES_COUNT);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() ->
                 frenchMissingList.forEach(generatedWordsDto -> {
                     try {
                         factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
-                        factory.getTranslateClient(Language.CS).translateWord(generatedWordsDto);
                         wordsRepository.save(generatedWordsDto);
                     } catch (GettingTranslateException | InterruptedException | IOException e) {
                         e.printStackTrace();
                     } catch (LimitExceededException | AuthTranslateException e) {
-                        logger.error(e.getMessage());
+                        log.error(e.getMessage());
                         try {
                             emailSender.sendSimpleMessage(e.getMessage(), e.getMessage());
                         } catch (MailSendException ex) {
@@ -97,9 +96,6 @@ public class WordsSavingService {
                     }
                 })
         );
-        executor.shutdown();
-        while (!executor.isTerminated()) {
-        }
     }
 
     private synchronized void saveMissingWords(int wordsCount,
@@ -141,23 +137,25 @@ public class WordsSavingService {
             else wordList.get(i).setCode(++max);
         }
         wordList.forEach(generatedWords -> {
-            try {
-                wordsRepository.save(generatedWords);
-            } catch (DataIntegrityViolationException e) {
-                fillWordsUp(1);
-            }
+            if (wordsRepository.findByCode(generatedWords.getCode()).isEmpty())
+                try {
+                    wordsRepository.save(generatedWords);
+                } catch (DataIntegrityViolationException e) {
+                    log.error(e.getMessage());
+                    notSaved++;
+                }
         });
         wordsRepository.flush();
     }
 
     @PostConstruct
+    @Scheduled(cron = "0 59 17 * * ?", zone = "Europe/Paris")
     private void defaultFillUp() {
-        if (wordsCount == 0) {
-            if (wordsRepository.count() == 0) {
-                wordsCount = defaultWordCount;
-                fillWordsUp(wordsCount);
-            }
-        }
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            log.debug("filling " + defaultWordCount + " more words");
+            fillWordsUp(defaultWordCount);
+        });
     }
 
 }

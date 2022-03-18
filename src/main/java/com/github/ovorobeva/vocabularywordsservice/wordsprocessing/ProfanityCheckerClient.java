@@ -2,8 +2,7 @@ package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import lombok.Data;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -16,14 +15,14 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 @Data
+@Slf4j
 public class ProfanityCheckerClient {
-    protected final Logger logger = LogManager.getLogger();
 
     public boolean isProfanity(String word) {
 
         final String BASE_URL = "https://www.purgomalum.com/service/containsprofanity";
 
-        logger.info("isProfanity: Start checking the word " + word);
+        log.info("isProfanity: Start checking the word " + word);
 
         URI uri = new DefaultUriBuilderFactory(BASE_URL).builder()
                 .queryParam("text", word)
@@ -39,7 +38,7 @@ public class ProfanityCheckerClient {
         try {
             CompletableFuture<HttpResponse<String>> response =
                     client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-            logger.info("execute. URL is: " + response.get().uri() + "\n is profanity = " + response.get().body());
+            log.info("execute. URL is: " + response.get().uri() + "\n is profanity = " + response.get().body());
 
             if (response.get().statusCode() >= 200 && response.get().statusCode() < 300) {
                 return response.get().body().equals("true");
@@ -50,12 +49,12 @@ public class ProfanityCheckerClient {
             } else if (response.get().statusCode() == 405) {
                 return isProfanity(word);
             } else {
-                logger.error("There is an error during request by link " + response.get().uri() + " . Error code is: " + response.get().statusCode());
+                log.error("There is an error during request by link " + response.get().uri() + " . Error code is: " + response.get().statusCode());
                 return false;
             }
         } catch (IllegalStateException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
-            logger.error("There is an error during request by link " + request.uri() + e.getMessage());
+            log.error("There is an error during request by link " + request.uri() + e.getMessage());
             return false;
         } catch (TooManyRequestsException e) {
             try {
