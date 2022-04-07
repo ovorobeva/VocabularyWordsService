@@ -2,7 +2,6 @@ package com.github.ovorobeva.vocabularywordsservice.controller;
 
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.service.WordsRetrievingService;
-import com.github.ovorobeva.vocabularywordsservice.service.WordsSavingService;
 import jakarta.ws.rs.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +20,6 @@ public class Controller {
 
     @Value("${default.words.count}")
     int wordCount;
-    @Autowired
-    private WordsSavingService wordsSavingService;
     @Autowired
     private WordsRetrievingService wordsRetrievingService;
 

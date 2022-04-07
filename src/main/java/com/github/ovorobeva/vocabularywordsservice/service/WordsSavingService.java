@@ -153,7 +153,7 @@ public class WordsSavingService {
     }
 
     @PostConstruct
-    @Scheduled(cron = "0 59 17 * * ?", zone = "Europe/Paris")
+    @Scheduled(cron = "0 0 04 * * ?", zone = "Europe/Paris")
     private void defaultFillUp() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
