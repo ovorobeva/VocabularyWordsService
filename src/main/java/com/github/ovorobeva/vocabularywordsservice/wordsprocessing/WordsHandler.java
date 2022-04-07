@@ -4,6 +4,7 @@ import com.github.ovorobeva.vocabularywordsservice.emailsender.EmailSender;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
@@ -160,9 +161,13 @@ public class WordsHandler {
         TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
         TranslateClient translateClientCz = factory.getTranslateClient(Language.CS);
 
-        translateClientRu.translateWord(word);
-        translateClientFr.translateWord(word);
-        translateClientCz.translateWord(word);
+        try {
+            translateClientRu.translateWord(word);
+            translateClientFr.translateWord(word);
+            translateClientCz.translateWord(word);
+        } catch (TranslationNotFoundException e){
+            log.error(e.getMessage());
+        }
     }
 }
 

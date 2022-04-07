@@ -1,9 +1,6 @@
 package com.github.ovorobeva.vocabularywordsservice.translates;
 
-import com.github.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
-import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
-import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
-import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.*;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -49,5 +46,6 @@ public abstract class TranslateClient {
             LimitExceededException,
             InterruptedException,
             IOException,
-            AuthTranslateException {}
+            AuthTranslateException,
+            TranslationNotFoundException {}
 }

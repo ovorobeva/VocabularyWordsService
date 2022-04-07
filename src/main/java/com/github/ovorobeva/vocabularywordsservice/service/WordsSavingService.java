@@ -5,6 +5,7 @@ import com.github.ovorobeva.vocabularywordsservice.emailsender.EmailSender;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
@@ -83,7 +84,10 @@ public class WordsSavingService {
                     try {
                         factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
                         wordsRepository.save(generatedWordsDto);
-                    } catch (GettingTranslateException | InterruptedException | IOException e) {
+                    } catch (GettingTranslateException
+                            | TranslationNotFoundException
+                            | InterruptedException
+                            | IOException e) {
                         e.printStackTrace();
                     } catch (LimitExceededException | AuthTranslateException e) {
                         log.error(e.getMessage());
