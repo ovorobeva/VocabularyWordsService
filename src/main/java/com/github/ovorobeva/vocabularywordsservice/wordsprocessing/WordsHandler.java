@@ -79,7 +79,6 @@ public class WordsHandler {
                         checkedWords.add(lemma);
                         GeneratedWordsDto generatedWord = new GeneratedWordsDto(lemma, 0);
                         translateWord(generatedWord);
-                        //todo: to check if translation is missing
                         wordsToAdd.add(generatedWord);
                     }
                 }
