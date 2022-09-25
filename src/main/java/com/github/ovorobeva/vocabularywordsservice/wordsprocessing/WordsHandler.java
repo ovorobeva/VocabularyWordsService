@@ -9,8 +9,8 @@ import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWord
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 
@@ -25,22 +25,16 @@ import java.util.regex.Pattern;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class WordsHandler {
 
-//    protected final log log = LogManager.getlog();
+    private final WordsClient wordsClient;
+    private final PartsOfSpeechClient partsOfSpeechClient;
+    private final TranslateFactory factory;
+    private final ProfanityCheckerClient profanityCheckerClient;
+    private final LemmaClient lemmaClient;
+    private final EmailSender emailSender;
 
-    @Autowired
-    private WordsClient wordsClient;
-    @Autowired
-    private PartsOfSpeechClient partsOfSpeechClient;
-    @Autowired
-    private TranslateFactory factory;
-    @Autowired
-    private ProfanityCheckerClient profanityCheckerClient;
-    @Autowired
-    private LemmaClient lemmaClient;
-    @Autowired
-    private EmailSender emailSender;
     private int defWordCount = 0;
 
 

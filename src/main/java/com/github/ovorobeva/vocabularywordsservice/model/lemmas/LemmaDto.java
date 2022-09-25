@@ -16,6 +16,9 @@ public class LemmaDto {
 
     }
 
+    /**
+     * frequency of using
+     */
     @lombok.Data
     public static class Token {
         private int syncon;

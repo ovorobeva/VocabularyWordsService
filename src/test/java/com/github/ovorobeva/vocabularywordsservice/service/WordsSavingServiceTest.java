@@ -52,9 +52,7 @@ class WordsSavingServiceTest {
         int randomCode = random.nextInt((int) (wordsRepository.count())) + 1;
         GeneratedWordsDto word = wordsRepository.getByCode(randomCode);
         String currentTranslationFr = word.getFr();
-        String currentTranslationCz = word.getCz();
         word.setFr(null);
-        word.setCz(null);
         wordsRepository.saveAndFlush(word);
 
         ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -62,7 +60,6 @@ class WordsSavingServiceTest {
         executor.shutdown();
         Thread.sleep(10000);
         assertThat(wordsRepository.getByCode(randomCode).getFr()).isEqualTo(currentTranslationFr);
-        assertThat(wordsRepository.getByCode(randomCode).getCz()).isEqualTo(currentTranslationCz);
     }
 
     @AfterEach

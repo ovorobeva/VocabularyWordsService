@@ -52,9 +52,10 @@ class WordsHandlerTest {
                 "eleven"};
         count = random.nextInt(10) + 2;
         List<String> mockedList = new ArrayList<>(Arrays.asList(WORDS).subList(0, count));
+        System.out.println(mockedList);
         Mockito.when(wordsClient.getRandomWords(Mockito.anyInt())).thenReturn(mockedList);
 
-        Mockito.when(lemmaClient.getLemma(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
+        Mockito.when(lemmaClient.getLemma(Mockito.anyString())).then(AdditionalAnswers.returnsFirstArg());
         Mockito.when(partsOfSpeechClient.getPartsOfSpeech(Mockito.any())).thenReturn(List.of(new String[]{"noun"}));
         Mockito.when(profanityCheckerClient.isProfanity(Mockito.any())).thenReturn(false);
         Mockito.when(translateFactory.getTranslateClient(Mockito.any())).thenReturn(new TranslateClientTestConfiguration());
@@ -63,6 +64,7 @@ class WordsHandlerTest {
     @Test
     void getProcessedWordsTest() throws InterruptedException {
         int lastCode = random.nextInt(10);
+        System.out.println(String.format("Last code is %s", lastCode));
         List<GeneratedWordsDto> wordList = new ArrayList<>();
         wordsHandler.getProcessedWords(wordList, count, lastCode);
         assertThat(wordList).hasSize(count);
