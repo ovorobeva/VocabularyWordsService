@@ -74,8 +74,8 @@ public class WordsSavingService {
                     }
                 });
                 wordsRepository.flush();
-            } else
-                saveMissingWords(wordsCount, recordsCount, max, codes);
+            } else{
+                saveMissingWords(wordsCount, recordsCount, max, codes);}
         });
         executor.shutdown();
         while (!executor.isTerminated()) {
@@ -109,7 +109,7 @@ public class WordsSavingService {
         );
     }
 
-    private synchronized void saveMissingWords(int wordsCount,
+    private void saveMissingWords(int wordsCount,
                                                int recordsCount,
                                                int max,
                                                int[] codes) {
@@ -151,6 +151,7 @@ public class WordsSavingService {
             else wordList.get(i).setCode(++max);
         }
         wordList.forEach(generatedWords -> {
+            System.out.println("777777777");
             if (wordsRepository.findByCode(generatedWords.getCode()).isEmpty())
                 try {
                     wordsRepository.save(generatedWords);

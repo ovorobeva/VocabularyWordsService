@@ -5,8 +5,11 @@ import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.testconfigurations.TranslateClientTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalAnswers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(MockitoExtension.class)
 class WordsHandlerTest {
 
     private final Random random = new Random();
@@ -33,7 +37,7 @@ class WordsHandlerTest {
     private TranslateFactory translateFactory;
     @Autowired
     private ProfanityCheckerClient profanityCheckerClient;
-    @Autowired
+    @Mock
     private LemmaClient lemmaClient;
     private int count;
 

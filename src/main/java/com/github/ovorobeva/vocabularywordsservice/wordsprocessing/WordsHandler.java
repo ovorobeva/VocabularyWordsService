@@ -42,6 +42,7 @@ public class WordsHandler {
                                   int wordsCount,
                                   int lastCode) throws InterruptedException {
         if (defWordCount == 0) defWordCount = wordsCount;
+        System.out.println(defWordCount);
         List<String> words = wordsClient.getRandomWords(wordsCount);
         List<String> checkedWords = new ArrayList<>();
         List<GeneratedWordsDto> wordsToAdd = new ArrayList<>();
@@ -95,6 +96,7 @@ public class WordsHandler {
             wordsCount = defWordCount - generatedWordsList.size();
             getProcessedWords(generatedWordsList, wordsCount, lastCode);
         }
+        defWordCount = 0;
     }
 
     private void translateWord(GeneratedWordsDto word) {
