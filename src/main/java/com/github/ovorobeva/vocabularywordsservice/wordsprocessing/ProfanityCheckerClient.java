@@ -1,60 +1,31 @@
 package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs.ProfanityCheckerApi;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @Service
-@Data
-@Slf4j
-public class ProfanityCheckerClient {
+@FeignClient(name = "profanity-checker", decode404 = true, url = "https://www.purgomalum.com/service/")
+public interface ProfanityCheckerClient extends ProfanityCheckerApi {
 
-    public boolean isProfanity(String word) {
-
-        final String BASE_URL = "https://www.purgomalum.com/service/containsprofanity";
-
-        log.info("isProfanity: Start checking the word " + word);
-
-        URI uri = new DefaultUriBuilderFactory(BASE_URL).builder()
-                .queryParam("text", word)
-                .build();
-
-        HttpClient client = HttpClient.newBuilder()
-                .build();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri)
-                .GET()
-                .build();
+    default boolean isProfanity(String word) {
 
         try {
-            CompletableFuture<HttpResponse<String>> response =
-                    client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-            log.info("execute. URL is: " + response.get().uri() + "\n is profanity = " + response.get().body());
-
-            if (response.get().statusCode() >= 200 && response.get().statusCode() < 300) {
-                return response.get().body().equals("true");
-            } else if (response.get().statusCode() == 429) {
+            ResponseEntity<String> response = getLemma(word);
+            System.out.println("responssse" + response.getBody() + " request ");
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody().equals("true");
+            } else if (response.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)
+                    || response.getStatusCode().equals(HttpStatus.METHOD_NOT_ALLOWED)) {
                 throw new TooManyRequestsException();
-            } else if (response.get().statusCode() == 404) {
-                return false;
-            } else if (response.get().statusCode() == 405) {
-                return isProfanity(word);
             } else {
-                log.error("There is an error during request by link " + response.get().uri() + " . Error code is: " + response.get().statusCode());
                 return false;
             }
-        } catch (IllegalStateException | ExecutionException | InterruptedException e) {
+        } catch (IllegalStateException e) {
             e.printStackTrace();
-            log.error("There is an error during request by link " + request.uri() + e.getMessage());
             return false;
         } catch (TooManyRequestsException e) {
             try {
