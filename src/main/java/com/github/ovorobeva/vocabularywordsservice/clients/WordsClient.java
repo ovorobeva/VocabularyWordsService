@@ -1,10 +1,10 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
+package com.github.ovorobeva.vocabularywordsservice.clients;
 
+import com.github.ovorobeva.vocabularywordsservice.clients.apidocs.WordsApi;
 import com.github.ovorobeva.vocabularywordsservice.enums.ExcludedPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.enums.IncludedPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.words.RandomWordsDto;
-import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs.WordsApi;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

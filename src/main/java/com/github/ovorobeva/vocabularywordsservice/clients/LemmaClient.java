@@ -1,9 +1,9 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
+package com.github.ovorobeva.vocabularywordsservice.clients;
 
+import com.github.ovorobeva.vocabularywordsservice.clients.apidocs.LemmaApi;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaDto;
 import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaRequest;
-import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs.LemmaApi;
 import lombok.SneakyThrows;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;

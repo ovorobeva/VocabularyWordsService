@@ -1,4 +1,4 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs;
+package com.github.ovorobeva.vocabularywordsservice.clients.apidocs;
 
 import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaDto;
 import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaRequest;

@@ -9,7 +9,6 @@ import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoun
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
-import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.WordsHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

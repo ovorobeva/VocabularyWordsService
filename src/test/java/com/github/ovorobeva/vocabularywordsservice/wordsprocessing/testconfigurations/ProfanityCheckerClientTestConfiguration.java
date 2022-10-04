@@ -1,6 +1,6 @@
 package com.github.ovorobeva.vocabularywordsservice.wordsprocessing.testconfigurations;
 
-import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.ProfanityCheckerClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.ProfanityCheckerClient;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

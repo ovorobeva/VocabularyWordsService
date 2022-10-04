@@ -1,8 +1,8 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
+package com.github.ovorobeva.vocabularywordsservice.clients;
 
+import com.github.ovorobeva.vocabularywordsservice.clients.apidocs.PartsOfSpeechApi;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.partsofspeech.PartsOfSpeechDto;
-import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs.PartsOfSpeechApi;
 import feign.codec.DecodeException;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;

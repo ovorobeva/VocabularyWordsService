@@ -1,5 +1,9 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
+package com.github.ovorobeva.vocabularywordsservice.service;
 
+import com.github.ovorobeva.vocabularywordsservice.clients.LemmaClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.PartsOfSpeechClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.ProfanityCheckerClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.WordsClient;
 import com.github.ovorobeva.vocabularywordsservice.emailsender.EmailSender;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;

@@ -1,4 +1,4 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs;
+package com.github.ovorobeva.vocabularywordsservice.clients.apidocs;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,4 +1,4 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs;
+package com.github.ovorobeva.vocabularywordsservice.clients.apidocs;
 
 import com.github.ovorobeva.vocabularywordsservice.model.partsofspeech.PartsOfSpeechDto;
 import org.springframework.http.ResponseEntity;

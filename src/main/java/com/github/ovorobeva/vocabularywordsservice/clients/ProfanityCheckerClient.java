@@ -1,7 +1,7 @@
-package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
+package com.github.ovorobeva.vocabularywordsservice.clients;
 
+import com.github.ovorobeva.vocabularywordsservice.clients.apidocs.ProfanityCheckerApi;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
-import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs.ProfanityCheckerApi;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

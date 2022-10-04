@@ -1,6 +1,11 @@
 package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 
+import com.github.ovorobeva.vocabularywordsservice.clients.LemmaClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.PartsOfSpeechClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.ProfanityCheckerClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.WordsClient;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.service.WordsHandler;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.testconfigurations.TranslateClientTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
