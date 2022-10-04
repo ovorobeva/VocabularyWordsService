@@ -10,9 +10,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class WordsClientTest {
-    @Autowired
-    WordsClient wordsClient;
 
+    @Autowired
+    private WordsClient wordsClient;
 
     @Test
     void getRandomWordsTest() throws InterruptedException {

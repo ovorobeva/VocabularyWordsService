@@ -1,108 +1,69 @@
 package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 
+import com.github.ovorobeva.vocabularywordsservice.enums.ExcludedPartsOfSpeech;
+import com.github.ovorobeva.vocabularywordsservice.enums.IncludedPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.words.RandomWordsDto;
-import com.google.gson.Gson;
-import lombok.extern.log4j.Log4j2;
-import org.json.JSONArray;
+import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.apidocs.WordsApi;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @Service
-@Log4j2
-public class WordsClient {
+@FeignClient(name = "random-words", decode404 = true, url = "https://api.wordnik.com/v4/words.json/")
+public interface WordsClient extends WordsApi {
 
-    private static final Map<String, String> getenv = System.getenv();
-    private static final String TAG = "Custom logs";
+    Map<String, String> getenv = System.getenv();
 
-    public WordsClient() {
-    }
+    String MIN_CORPUS_COUNT = "10000";
+    String MAX_CORPUS_COUNT = "-1";
+    String MIN_DICTIONARY_COUNT = "1";
+    String MAX_DICTIONARY_COUNT = "-1";
+    String MIN_LENGTH = "2";
+    String MAX_LENGTH = "-1";
 
-    protected List<String> getRandomWords(int wordsCount) throws InterruptedException {
+    default List<String> getRandomWords(int wordsCount) throws InterruptedException {
 
-        final String BASE_URL = "https://api.wordnik.com/v4/";
         final String WORDS_API_KEY = getenv.get("WORDS_API_KEY");
         int returnedWords = 0;
         List<String> words = new LinkedList<>();
 
-
         List<String> includePartOfSpeechList = new ArrayList<>();
-        includePartOfSpeechList.add("noun");
-        includePartOfSpeechList.add("adjective");
-        includePartOfSpeechList.add("verb");
-        includePartOfSpeechList.add("idiom");
-        includePartOfSpeechList.add("past-participle");
-
+        for (IncludedPartsOfSpeech partsOfSpeech : IncludedPartsOfSpeech.values()) {
+            includePartOfSpeechList.add(partsOfSpeech.getValue());
+        }
 
         List<String> excludePartOfSpeechList = new ArrayList<>();
-        excludePartOfSpeechList.add("interjection");
-        excludePartOfSpeechList.add("pronoun");
-        excludePartOfSpeechList.add("preposition");
-        excludePartOfSpeechList.add("abbreviation");
-        excludePartOfSpeechList.add("affix");
-        excludePartOfSpeechList.add("article");
-        excludePartOfSpeechList.add("auxiliary-verb");
-        excludePartOfSpeechList.add("conjunction");
-        excludePartOfSpeechList.add("definite-article");
-        excludePartOfSpeechList.add("family-name");
-        excludePartOfSpeechList.add("given-name");
-        excludePartOfSpeechList.add("imperative");
-        excludePartOfSpeechList.add("proper-noun");
-        excludePartOfSpeechList.add("proper-noun-plural");
-        excludePartOfSpeechList.add("suffix");
-        excludePartOfSpeechList.add("verb-intransitive,");
-        excludePartOfSpeechList.add("verb-transitive");
+        for (ExcludedPartsOfSpeech partsOfSpeech : ExcludedPartsOfSpeech.values()) {
+            excludePartOfSpeechList.add(partsOfSpeech.getValue());
+        }
 
-
-        MultiValueMap<String, String> apiVariables = new LinkedMultiValueMap<>();
-        apiVariables.put("minCorpusCount", Collections.singletonList("10000"));
-        apiVariables.put("maxCorpusCount", Collections.singletonList("-1"));
-        apiVariables.put("minDictionaryCount", Collections.singletonList("1"));
-        apiVariables.put("maxDictionaryCount", Collections.singletonList("-1"));
-        apiVariables.put("minLength", Collections.singletonList("2"));
-        apiVariables.put("maxLength", Collections.singletonList("-1"));
-        apiVariables.put("includePartOfSpeech[]", includePartOfSpeechList);
-        apiVariables.put("excludePartOfSpeech[]", excludePartOfSpeechList);
-
-        URI uri = new DefaultUriBuilderFactory(BASE_URL).builder().pathSegment("words.json")
-                .pathSegment("randomWords")
-                .queryParams(apiVariables)
-                .queryParam("limit", wordsCount)
-                .queryParam("api_key", WORDS_API_KEY)
-                .build();
-
-        HttpClient client = HttpClient.newBuilder()
-                .build();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri)
-                .GET()
-                .build();
-        Gson converter = new Gson();
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                JSONArray jsonMessages = new JSONArray(response.body());
-                for (Object message : jsonMessages) {
-                    returnedWords++;
-                    words.add(converter.fromJson(message.toString(), RandomWordsDto.class).getWord());
-                }
-                log.info("execute. URL is: " + response.uri());
-                log.info("execute. Response to process is: " + words);
-            } else if (response.statusCode() == 429) {
+            ResponseEntity<List<RandomWordsDto>> response = getWords(MIN_CORPUS_COUNT,
+                    MAX_CORPUS_COUNT,
+                    MIN_DICTIONARY_COUNT,
+                    MAX_DICTIONARY_COUNT,
+                    MIN_LENGTH,
+                    MAX_LENGTH,
+                    includePartOfSpeechList,
+                    excludePartOfSpeechList,
+                    wordsCount,
+                    WORDS_API_KEY);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    response.getBody().forEach(word -> words.add(word.getWord()));
+                    returnedWords = words.size();
+            } else if (response.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)){
                 throw new TooManyRequestsException();
-            } else
-                log.error("There is an error during request by link " + request.uri() + " . Error code is: " + response.statusCode());
-        } catch (IOException e) {
-            e.printStackTrace();
+            } else{
+                //todo:to handle some common exception
+                return words;
+            }
         } catch (TooManyRequestsException e) {
             Thread.sleep(10000);
             e.printStackTrace();

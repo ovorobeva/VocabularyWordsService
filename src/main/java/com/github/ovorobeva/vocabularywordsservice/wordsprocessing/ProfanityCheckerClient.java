@@ -15,7 +15,6 @@ public interface ProfanityCheckerClient extends ProfanityCheckerApi {
 
         try {
             ResponseEntity<String> response = getLemma(word);
-            System.out.println("responssse" + response.getBody() + " request ");
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 return response.getBody().equals("true");
             } else if (response.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)
