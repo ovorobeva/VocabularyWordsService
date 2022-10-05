@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor
 public class WordsHandler {
+    //todo: refactor autowiring and mocking of clients in test
 
     private final WordsClient wordsClient;
     private final PartsOfSpeechClient partsOfSpeechClient;

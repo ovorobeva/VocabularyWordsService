@@ -6,8 +6,8 @@ import com.github.ovorobeva.vocabularywordsservice.clients.ProfanityCheckerClien
 import com.github.ovorobeva.vocabularywordsservice.clients.WordsClient;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.service.WordsHandler;
+import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
-import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.testconfigurations.TranslateClientTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +15,6 @@ import org.mockito.AdditionalAnswers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -32,18 +31,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WordsHandlerTest {
 
     private final Random random = new Random();
-    @Autowired
+    @Mock
     private WordsHandler wordsHandler;
-    @Autowired
+    @Mock
     private WordsClient wordsClient;
-    @Autowired
+    @Mock
     private PartsOfSpeechClient partsOfSpeechClient;
-    @Autowired
+    @Mock
     private TranslateFactory translateFactory;
-    @Autowired
+    @Mock
+    private TranslateClient translateClient;
+    @Mock
     private ProfanityCheckerClient profanityCheckerClient;
     @Mock
     private LemmaClient lemmaClient;
+
     private int count;
 
     @BeforeEach
@@ -67,7 +69,7 @@ class WordsHandlerTest {
         Mockito.when(lemmaClient.getLemma(Mockito.anyString())).then(AdditionalAnswers.returnsFirstArg());
         Mockito.when(partsOfSpeechClient.getPartsOfSpeech(Mockito.any())).thenReturn(List.of(new String[]{"noun"}));
         Mockito.when(profanityCheckerClient.isProfanity(Mockito.any())).thenReturn(false);
-        Mockito.when(translateFactory.getTranslateClient(Mockito.any())).thenReturn(new TranslateClientTestConfiguration());
+        Mockito.when(translateFactory.getTranslateClient(Mockito.any())).thenReturn(translateClient);
     }
 
     @Test
