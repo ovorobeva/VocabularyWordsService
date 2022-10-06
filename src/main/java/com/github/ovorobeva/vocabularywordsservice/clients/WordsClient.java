@@ -5,6 +5,7 @@ import com.github.ovorobeva.vocabularywordsservice.enums.ExcludedPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.enums.IncludedPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.words.RandomWordsDto;
+import feign.RetryableException;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +65,7 @@ public interface WordsClient extends WordsApi {
                 //todo:to handle some common exception
                 return words;
             }
-        } catch (TooManyRequestsException e) {
+        } catch (TooManyRequestsException | RetryableException e) {
             Thread.sleep(10000);
             e.printStackTrace();
             if ((wordsCount - returnedWords) > 0)

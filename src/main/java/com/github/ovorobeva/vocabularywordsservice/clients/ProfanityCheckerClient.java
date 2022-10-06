@@ -2,6 +2,7 @@ package com.github.ovorobeva.vocabularywordsservice.clients;
 
 import com.github.ovorobeva.vocabularywordsservice.clients.apidocs.ProfanityCheckerApi;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
+import feign.RetryableException;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,7 @@ public interface ProfanityCheckerClient extends ProfanityCheckerApi {
             ResponseEntity<String> response = getLemma(word);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 return response.getBody().equals("true");
-            } else if (response.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)
-                    || response.getStatusCode().equals(HttpStatus.METHOD_NOT_ALLOWED)) {
+            } else if (response.getStatusCode().equals(HttpStatus.METHOD_NOT_ALLOWED)) {
                 throw new TooManyRequestsException();
             } else {
                 return false;
@@ -26,7 +26,7 @@ public interface ProfanityCheckerClient extends ProfanityCheckerApi {
         } catch (IllegalStateException e) {
             e.printStackTrace();
             return false;
-        } catch (TooManyRequestsException e) {
+        } catch (TooManyRequestsException | RetryableException e) {
             try {
                 Thread.sleep(15000);
             } catch (InterruptedException ex) {

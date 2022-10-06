@@ -1,12 +1,11 @@
 package com.github.ovorobeva.vocabularywordsservice.clients;
 
 import com.github.ovorobeva.vocabularywordsservice.clients.apidocs.LemmaApi;
-import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaDto;
 import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaRequest;
+import feign.RetryableException;
 import lombok.SneakyThrows;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +26,10 @@ public interface LemmaClient extends LemmaApi {
                 if (response.getBody().getData().getTokens().get(0).getSyncon() == -1)
                     return SELDOM_WORD;
                 return response.getBody().getData().getTokens().get(0).getLemma();
-            } else if (response.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)) {
-                throw new TooManyRequestsException();
             } else {
                 return word;
             }
-        } catch (TooManyRequestsException e) {
+        } catch (RetryableException e) {
             try {
                 Thread.sleep(15000);
             } catch (InterruptedException ex) {
