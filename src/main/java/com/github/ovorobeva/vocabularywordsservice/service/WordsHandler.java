@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor
 public class WordsHandler {
-    //todo: refactor autowiring and mocking of clients in test
 
     private final WordsClient wordsClient;
     private final PartsOfSpeechClient partsOfSpeechClient;
@@ -41,7 +40,6 @@ public class WordsHandler {
     private final EmailSender emailSender;
 
     private int defWordCount = 0;
-
 
     public void getProcessedWords(List<GeneratedWordsDto> generatedWordsList,
                                   int wordsCount,

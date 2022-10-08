@@ -18,10 +18,9 @@ public interface LemmaClient extends LemmaApi {
     @SneakyThrows
     default String getLemma(String word) {
 
-        LemmaRequest request = new LemmaRequest(word);
-        ResponseEntity<LemmaDto> response = getLemma(request);
-
+        final LemmaRequest request = new LemmaRequest(word);
         try {
+            final ResponseEntity<LemmaDto> response = getLemma(request);
             if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
                 if (response.getBody().getData().getTokens().get(0).getSyncon() == -1)
                     return SELDOM_WORD;
