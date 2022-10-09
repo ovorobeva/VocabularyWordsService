@@ -8,7 +8,7 @@ import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededExcep
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
-import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
+import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -33,10 +32,10 @@ import java.util.concurrent.Executors;
 @RequiredArgsConstructor
 public class WordsSavingService {
 
-    private final TranslateFactory factory;
     private final WordsHandler wordsHandler;
     private final WordsRepository wordsRepository;
     private final EmailSender emailSender;
+    private final TranslateClient translateClient;
 
     @Value("${default.words.count}")
     int defaultWordCount;
@@ -88,12 +87,11 @@ public class WordsSavingService {
         executor.execute(() ->
                 frenchMissingList.forEach(generatedWordsDto -> {
                     try {
-                        factory.getTranslateClient(Language.FR).translateWord(generatedWordsDto);
+                        translateClient.translateWord(generatedWordsDto, Language.FR);
                         wordsRepository.save(generatedWordsDto);
                     } catch (GettingTranslateException
                             | TranslationNotFoundException
-                            | InterruptedException
-                            | IOException e) {
+                            | InterruptedException e) {
                         e.printStackTrace();
                     } catch (LimitExceededException | AuthTranslateException e) {
                         log.error(e.getMessage());

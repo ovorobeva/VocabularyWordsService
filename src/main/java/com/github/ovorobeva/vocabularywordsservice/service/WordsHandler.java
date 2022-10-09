@@ -5,6 +5,7 @@ import com.github.ovorobeva.vocabularywordsservice.clients.PartsOfSpeechClient;
 import com.github.ovorobeva.vocabularywordsservice.clients.ProfanityCheckerClient;
 import com.github.ovorobeva.vocabularywordsservice.clients.WordsClient;
 import com.github.ovorobeva.vocabularywordsservice.emailsender.EmailSender;
+import com.github.ovorobeva.vocabularywordsservice.enums.CorrectPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
@@ -12,7 +13,6 @@ import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoun
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
-import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailSendException;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -34,7 +35,7 @@ public class WordsHandler {
 
     private final WordsClient wordsClient;
     private final PartsOfSpeechClient partsOfSpeechClient;
-    private final TranslateFactory factory;
+    private final TranslateClient translateClient;
     private final ProfanityCheckerClient profanityCheckerClient;
     private final LemmaClient lemmaClient;
     private final EmailSender emailSender;
@@ -120,51 +121,31 @@ public class WordsHandler {
 
     private boolean isPartOfSpeechCorrect(String word) {
         log.info("isPartOfSpeechCorrect: the word " + word + " is being checked");
-        boolean isCorrect = true;
-        List<String> partsOfSpeech = null;
         try {
+            List<String> partsOfSpeech;
             partsOfSpeech = partsOfSpeechClient.getPartsOfSpeech(word);
+            log.debug("isPartOfSpeechCorrect: parts of speech for the word " + word + " are: " + partsOfSpeech);
+            if (partsOfSpeech == null || partsOfSpeech.isEmpty()) {
+                return false;
+            }
+            return Arrays.stream(CorrectPartsOfSpeech.values()).anyMatch(partsOfSpeech::contains);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-
-        log.debug("isPartOfSpeechCorrect: parts of speech for the word " + word + " are: " + partsOfSpeech);
-
-        if (partsOfSpeech == null || partsOfSpeech.isEmpty()) {
             return false;
         }
-
-        for (String partOfSpeech : partsOfSpeech) {
-            if (!partOfSpeech.matches("(?i)noun" +
-                    "|phrasal verb" +
-                    "|adverb & adjective" +
-                    "|adjective" +
-                    "|transitive & intransitive verb" +
-                    "|transitive verb" +
-                    "|intransitive verb" +
-                    "|verb" +
-                    "|adverb" +
-                    "|idiom" +
-                    "|past-participle") || partOfSpeech.isEmpty()) {
-                log.info("isPartOfSpeechCorrect: The word " + word + " is to be removed because of part of speech: " + partOfSpeech);
-                isCorrect = false;
-                break;
-            }
-        }
-        return isCorrect;
     }
 
-    private void translate(GeneratedWordsDto word) throws AuthTranslateException, GettingTranslateException, LimitExceededException, IOException, InterruptedException {
-        TranslateClient translateClientRu = factory.getTranslateClient(Language.RU);
-        TranslateClient translateClientFr = factory.getTranslateClient(Language.FR);
-        TranslateClient translateClientCz = factory.getTranslateClient(Language.CS);
-
-        try {
-            translateClientRu.translateWord(word);
-            translateClientFr.translateWord(word);
-            translateClientCz.translateWord(word);
-        } catch (TranslationNotFoundException e){
-            log.error(e.getMessage());
+    private void translate(GeneratedWordsDto word) throws AuthTranslateException,
+            GettingTranslateException,
+            LimitExceededException,
+            IOException,
+            InterruptedException {
+        for (Language language : Language.values()) {
+            try {
+                translateClient.translateWord(word, language);
+            } catch (TranslationNotFoundException e) {
+                log.error(e.getMessage());
+            }
         }
     }
 }

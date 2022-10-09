@@ -3,11 +3,10 @@ package com.github.ovorobeva.vocabularywordsservice.clients;
 import com.github.ovorobeva.vocabularywordsservice.clients.apidocs.WordsApi;
 import com.github.ovorobeva.vocabularywordsservice.enums.ExcludedPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.enums.IncludedPartsOfSpeech;
-import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.words.RandomWordsDto;
+import feign.FeignException;
 import feign.RetryableException;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -57,19 +56,19 @@ public interface WordsClient extends WordsApi {
                     wordsCount,
                     WORDS_API_KEY);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    response.getBody().forEach(word -> words.add(word.getWord()));
-                    returnedWords = words.size();
-            } else if (response.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)){
-                throw new TooManyRequestsException();
-            } else{
+                response.getBody().forEach(word -> words.add(word.getWord()));
+                returnedWords = words.size();
+            } else {
                 //todo:to handle some common exception
                 return words;
             }
-        } catch (TooManyRequestsException | RetryableException e) {
-            Thread.sleep(10000);
+        } catch (RetryableException e) {
             e.printStackTrace();
-            if ((wordsCount - returnedWords) > 0)
-                return getRandomWords(wordsCount - returnedWords);
+            if (e.getCause() instanceof FeignException.TooManyRequests) {
+                Thread.sleep(10000);
+                if ((wordsCount - returnedWords) > 0)
+                    return getRandomWords(wordsCount - returnedWords);
+            }
         }
         return words;
     }

@@ -7,7 +7,6 @@ import com.github.ovorobeva.vocabularywordsservice.clients.WordsClient;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.service.WordsHandler;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
-import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,8 +37,6 @@ class WordsHandlerTest {
     @Mock
     private PartsOfSpeechClient partsOfSpeechClient;
     @Mock
-    private TranslateFactory translateFactory;
-    @Mock
     private TranslateClient translateClient;
     @Mock
     private ProfanityCheckerClient profanityCheckerClient;
@@ -69,7 +66,6 @@ class WordsHandlerTest {
         Mockito.when(lemmaClient.getLemma(Mockito.anyString())).then(AdditionalAnswers.returnsFirstArg());
         Mockito.when(partsOfSpeechClient.getPartsOfSpeech(Mockito.any())).thenReturn(List.of(new String[]{"noun"}));
         Mockito.when(profanityCheckerClient.isProfanity(Mockito.any())).thenReturn(false);
-        Mockito.when(translateFactory.getTranslateClient(Mockito.any())).thenReturn(translateClient);
     }
 
     @Test

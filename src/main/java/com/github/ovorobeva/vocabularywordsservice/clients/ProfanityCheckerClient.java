@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 public interface ProfanityCheckerClient extends ProfanityCheckerApi {
 
     default boolean isProfanity(String word) {
-
         try {
             ResponseEntity<String> response = getLemma(word);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
