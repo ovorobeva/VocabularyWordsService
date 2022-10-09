@@ -59,7 +59,7 @@ public class WordsSavingService {
 
                 List<GeneratedWordsDto> wordList = new LinkedList<>();
                 try {
-                    wordsHandler.getProcessedWords(wordList, wordsCount, code);
+                    wordsHandler.fillWords(wordList, wordsCount, code);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -114,7 +114,7 @@ public class WordsSavingService {
                 + "%04d elements saved", wordsCount, max, recordsCount));
         List<GeneratedWordsDto> wordList = new LinkedList<>();
         try {
-            wordsHandler.getProcessedWords(wordList, wordsCount, 0);
+            wordsHandler.fillWords(wordList, wordsCount, 0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -160,7 +160,7 @@ public class WordsSavingService {
         wordsRepository.flush();
     }
 
-    @PostConstruct
+    //   @PostConstruct
     @Scheduled(cron = "0 0 04 * * ?", zone = "Europe/Paris")
     private synchronized void defaultFillUp() {
         ExecutorService executor = Executors.newSingleThreadExecutor();

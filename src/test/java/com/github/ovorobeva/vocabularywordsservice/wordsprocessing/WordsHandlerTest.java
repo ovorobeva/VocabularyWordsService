@@ -4,17 +4,22 @@ import com.github.ovorobeva.vocabularywordsservice.clients.LemmaClient;
 import com.github.ovorobeva.vocabularywordsservice.clients.PartsOfSpeechClient;
 import com.github.ovorobeva.vocabularywordsservice.clients.ProfanityCheckerClient;
 import com.github.ovorobeva.vocabularywordsservice.clients.WordsClient;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.service.WordsHandler;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
+import com.github.ovorobeva.vocabularywordsservice.translates.testconf.TestClientMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalAnswers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
@@ -25,12 +30,11 @@ import java.util.Random;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(MockitoExtension.class)
 class WordsHandlerTest {
 
     private final Random random = new Random();
-    @Mock
+    @InjectMocks
     private WordsHandler wordsHandler;
     @Mock
     private WordsClient wordsClient;
@@ -38,6 +42,8 @@ class WordsHandlerTest {
     private PartsOfSpeechClient partsOfSpeechClient;
     @Mock
     private TranslateClient translateClient;
+
+    private TestClientMock testClientMock = new TestClientMock();
     @Mock
     private ProfanityCheckerClient profanityCheckerClient;
     @Mock
@@ -46,7 +52,7 @@ class WordsHandlerTest {
     private int count;
 
     @BeforeEach
-    void beforeEach() throws InterruptedException {
+    void beforeEach() throws InterruptedException, TranslationNotFoundException, AuthTranslateException, GettingTranslateException, LimitExceededException {
         final String[] WORDS = {"one",
                 "two",
                 "three",
@@ -62,18 +68,23 @@ class WordsHandlerTest {
         List<String> mockedList = new ArrayList<>(Arrays.asList(WORDS).subList(0, count));
         System.out.println(mockedList);
         Mockito.when(wordsClient.getRandomWords(Mockito.anyInt())).thenReturn(mockedList);
-
         Mockito.when(lemmaClient.getLemma(Mockito.anyString())).then(AdditionalAnswers.returnsFirstArg());
-        Mockito.when(partsOfSpeechClient.getPartsOfSpeech(Mockito.any())).thenReturn(List.of(new String[]{"noun"}));
+        Mockito.when(partsOfSpeechClient.getPartsOfSpeech(Mockito.anyString())).thenReturn(List.of(new String[]{"noun"}));
         Mockito.when(profanityCheckerClient.isProfanity(Mockito.any())).thenReturn(false);
+        Mockito.doAnswer(invocationOnMock -> {
+            testClientMock.translateWord(
+                    invocationOnMock.getArgument(0),
+                    invocationOnMock.getArgument(1)
+            );
+            return null;
+        }).when(translateClient).translateWord(Mockito.any(), Mockito.any());
     }
 
     @Test
     void getProcessedWordsTest() throws InterruptedException {
         int lastCode = random.nextInt(10);
-        System.out.println(String.format("Last code is %s", lastCode));
         List<GeneratedWordsDto> wordList = new ArrayList<>();
-        wordsHandler.getProcessedWords(wordList, count, lastCode);
+        wordsHandler.fillWords(wordList, count, lastCode);
         assertThat(wordList).hasSize(count);
         assertThat(wordList.get(count - 1).getCode()).isEqualTo(lastCode + count - 1);
         assertThat(wordList.get(random.nextInt(count - 1) + 1).getFr()).containsSequence("Fr");

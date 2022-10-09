@@ -6,6 +6,7 @@ import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateEx
 import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.model.translate.TranslateDto;
 import feign.FeignException;
 import feign.RetryableException;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -26,17 +27,15 @@ public interface TranslateClient extends TranslateApi {
             TranslationNotFoundException {
 
         try {
-            ResponseEntity<String> response = getTranslate(word.getEn(),
+            ResponseEntity<TranslateDto> response = getTranslate(word.getEn(),
                     API_KEY,
                     Language.EN.getValue(),
                     targetLanguage.getValue());
-            System.out.println(response.getHeaders().getAccessControlRequestHeaders());
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                setTranslation(word, targetLanguage, response.getBody());
-            } else if (!response.hasBody() || response.getBody().isEmpty()) {
-                throw new TranslationNotFoundException("Cz translation for the word "
-                        + word.getEn()
-                        + " is not found.");
+                setTranslation(word, targetLanguage, response.getBody().getTranslations().get(0).getText());
+            } else if (!response.hasBody()) {
+                throw new TranslationNotFoundException(String.format(
+                        "Cz translation for the word %s is not found.", word.getEn()));
             }
         } catch (RetryableException e) {
             e.printStackTrace();
@@ -47,6 +46,9 @@ public interface TranslateClient extends TranslateApi {
                 throw new LimitExceededException("Limit is exceeded, check your account https://www.deepl.com/ru/pro-account/usage");
             } else if (e.getCause() instanceof FeignException.Forbidden) {
                 throw new AuthTranslateException("Api key is compromised and needs to be checked in the account details https://www.deepl.com/ru/pro-account/usage");
+            } else if (e.getCause() instanceof FeignException.NotFound) {
+                throw new TranslationNotFoundException(String.format(
+                        "Cz translation for the word %s is not found.", word.getEn()));
             } else {
                 throw new GettingTranslateException();
             }

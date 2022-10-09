@@ -18,11 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -40,54 +39,33 @@ public class WordsHandler {
     private final LemmaClient lemmaClient;
     private final EmailSender emailSender;
 
+    private final Pattern pattern = Pattern.compile("[^a-zA-Z[-]]");
     private int defWordCount = 0;
 
-    public void getProcessedWords(List<GeneratedWordsDto> generatedWordsList,
-                                  int wordsCount,
-                                  int lastCode) throws InterruptedException {
-        if (defWordCount == 0) defWordCount = wordsCount;
-        System.out.println(defWordCount);
+    public void fillWords(List<GeneratedWordsDto> generatedWordsList,
+                          int wordsCount,
+                          int lastCode) throws InterruptedException {
+        if (defWordCount == 0) {
+            defWordCount = wordsCount;
+        }
+
         List<String> words = wordsClient.getRandomWords(wordsCount);
-        List<String> checkedWords = new ArrayList<>();
         List<GeneratedWordsDto> wordsToAdd = new ArrayList<>();
-        Iterator<String> iterator = words.iterator();
 
         log.debug("getWords: Starting removing non-matching words from the list \n" + words);
 
         List<ExecutorService> executors = new ArrayList<>();
-        while (iterator.hasNext()) {
-            String word = iterator.next();
-            Pattern pattern = Pattern.compile("[^a-zA-Z[-]]");
-
+        words.forEach(word -> {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executors.add(executor);
-            executor.execute(() -> {
-                Matcher matcher = pattern.matcher(word);
-                String lemma;
-                if (matcher.find()) {
-                    log.info("getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
-                } else {
-                    lemma = lemmaClient.getLemma(word);
-                    if (lemma.equals(LemmaClient.SELDOM_WORD)) {
-                        log.info("getWords: Removing the word " + lemma + " because of its never using.");
-                    } else if (!isPartOfSpeechCorrect(lemma)) {
-                        log.info("getWords: Removing the word " + lemma + " because of the wrong part of speech.");
-                    } else if (profanityCheckerClient.isProfanity(lemma)) {
-                        log.info("getWords: Removing the word " + lemma + " because of profanity.");
-                    } else {
-                        checkedWords.add(lemma);
-                        GeneratedWordsDto generatedWord = new GeneratedWordsDto(lemma, 0);
-                        translateWord(generatedWord);
-                        wordsToAdd.add(generatedWord);
-                    }
-                }
-            });
-        }
+            executor.execute(() -> checkWord(word).ifPresent(wordsToAdd::add));
+        });
 
         executors.forEach(executor -> {
             executor.shutdown();
             while (!executor.isTerminated()) {
             }
+          //  System.out.println(wordsToAdd.toString());
         });
 
         for (GeneratedWordsDto addedWord : wordsToAdd) {
@@ -98,17 +76,41 @@ public class WordsHandler {
 
         if (generatedWordsList.size() < defWordCount) {
             wordsCount = defWordCount - generatedWordsList.size();
-            getProcessedWords(generatedWordsList, wordsCount, lastCode);
+            fillWords(generatedWordsList, wordsCount, lastCode);
         }
         defWordCount = 0;
     }
 
+    private Optional<GeneratedWordsDto> checkWord(String word){
+            final Matcher matcher = pattern.matcher(word);
+            final String lemma;
+            if (matcher.find()) {
+                log.info("getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
+            } else {
+                lemma = lemmaClient.getLemma(word);
+                if (lemma.equals(LemmaClient.SELDOM_WORD)) {
+                    log.info("getWords: Removing the word " + lemma + " because of its never using.");
+                } else if (!isPartOfSpeechCorrect(lemma)) {
+                    log.info("getWords: Removing the word " + lemma + " because of the wrong part of speech.");
+                } else if (profanityCheckerClient.isProfanity(lemma)) {
+                    log.info("getWords: Removing the word " + lemma + " because of profanity.");
+                } else {
+                    GeneratedWordsDto generatedWord = new GeneratedWordsDto(lemma, 0);
+                    translateWord(generatedWord);
+                    return Optional.of(generatedWord);
+                }
+            }
+            return Optional.empty();
+    }
+
     private void translateWord(GeneratedWordsDto word) {
         try {
-            translate(word);
-        } catch (GettingTranslateException | InterruptedException | IOException e) {
+            for (Language language : Language.values()) {
+                    translateClient.translateWord(word, language);
+            }
+        } catch (GettingTranslateException | InterruptedException e) {
             e.printStackTrace();
-        } catch (LimitExceededException | AuthTranslateException e) {
+        } catch (LimitExceededException | AuthTranslateException | TranslationNotFoundException e ) {
             log.error(e.getMessage());
             try {
                 emailSender.sendSimpleMessage(e.getMessage(), e.getMessage());
@@ -124,28 +126,16 @@ public class WordsHandler {
         try {
             List<String> partsOfSpeech;
             partsOfSpeech = partsOfSpeechClient.getPartsOfSpeech(word);
+            System.out.println(partsOfSpeech);
             log.debug("isPartOfSpeechCorrect: parts of speech for the word " + word + " are: " + partsOfSpeech);
             if (partsOfSpeech == null || partsOfSpeech.isEmpty()) {
                 return false;
             }
-            return Arrays.stream(CorrectPartsOfSpeech.values()).anyMatch(partsOfSpeech::contains);
+            return Arrays.stream(CorrectPartsOfSpeech.values())
+                    .anyMatch(correctPartsOfSpeech -> partsOfSpeech.contains(correctPartsOfSpeech.getValue()));
         } catch (InterruptedException e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    private void translate(GeneratedWordsDto word) throws AuthTranslateException,
-            GettingTranslateException,
-            LimitExceededException,
-            IOException,
-            InterruptedException {
-        for (Language language : Language.values()) {
-            try {
-                translateClient.translateWord(word, language);
-            } catch (TranslationNotFoundException e) {
-                log.error(e.getMessage());
-            }
         }
     }
 }
