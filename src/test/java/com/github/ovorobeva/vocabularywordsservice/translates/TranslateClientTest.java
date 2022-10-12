@@ -14,16 +14,22 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class TranslateClientRuTest {
+class TranslateClientTest {
 
     @Autowired
-    private TranslateFactory translateFactory;
+    private TranslateClient translateClient;
 
     @Test
     void translateWordTestRu() throws AuthTranslateException, GettingTranslateException, LimitExceededException, IOException, InterruptedException, TranslationNotFoundException {
         GeneratedWordsDto word = new GeneratedWordsDto("word", 0);
         assertThat(word.getRu()).isNull();
-        translateFactory.getTranslateClient(Language.RU).translateWord(word);
+        assertThat(word.getFr()).isNull();
+        assertThat(word.getCz()).isNull();
+        translateClient.translateWord(word, Language.RU);
+        translateClient.translateWord(word, Language.FR);
+        translateClient.translateWord(word, Language.CZ);
         assertThat(word.getRu()).isEqualTo("слово");
+        assertThat(word.getCz()).isEqualTo("slovo");
+        assertThat(word.getFr()).isEqualTo("mot");
     }
 }

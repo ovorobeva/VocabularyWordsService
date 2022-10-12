@@ -1,6 +1,7 @@
 package com.github.ovorobeva.vocabularywordsservice.model.partsofspeech;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -8,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class PartsOfSpeechDto {
+@ToString(of = "meanings")
+public class
+PartsOfSpeechDto {
 
         private String word;
         private String phonetic;
@@ -17,10 +20,6 @@ public class PartsOfSpeechDto {
         private List<Meaning> meanings = new LinkedList<>();
         private Map<String, Object> additionalProperties = new HashMap<>();
 
-    @Override
-    public String toString() {
-        return meanings.toString();
-    }
     @Data
     public static class Meaning {
 

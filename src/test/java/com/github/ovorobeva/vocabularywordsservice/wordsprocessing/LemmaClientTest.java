@@ -1,5 +1,6 @@
 package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 
+import com.github.ovorobeva.vocabularywordsservice.clients.LemmaClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

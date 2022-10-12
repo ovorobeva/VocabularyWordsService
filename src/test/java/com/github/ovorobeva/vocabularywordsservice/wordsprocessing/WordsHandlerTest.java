@@ -1,14 +1,25 @@
 package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 
+import com.github.ovorobeva.vocabularywordsservice.clients.LemmaClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.PartsOfSpeechClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.ProfanityCheckerClient;
+import com.github.ovorobeva.vocabularywordsservice.clients.WordsClient;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.AuthTranslateException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
+import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
-import com.github.ovorobeva.vocabularywordsservice.translates.TranslateFactory;
-import com.github.ovorobeva.vocabularywordsservice.wordsprocessing.testconfigurations.TranslateClientTestConfiguration;
+import com.github.ovorobeva.vocabularywordsservice.service.WordsHandler;
+import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
+import com.github.ovorobeva.vocabularywordsservice.translates.testconf.TestClientMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalAnswers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
@@ -19,26 +30,29 @@ import java.util.Random;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(MockitoExtension.class)
 class WordsHandlerTest {
 
     private final Random random = new Random();
-    @Autowired
+    @InjectMocks
     private WordsHandler wordsHandler;
-    @Autowired
+    @Mock
     private WordsClient wordsClient;
-    @Autowired
+    @Mock
     private PartsOfSpeechClient partsOfSpeechClient;
-    @Autowired
-    private TranslateFactory translateFactory;
-    @Autowired
+    @Mock
+    private TranslateClient translateClient;
+
+    private TestClientMock testClientMock = new TestClientMock();
+    @Mock
     private ProfanityCheckerClient profanityCheckerClient;
-    @Autowired
+    @Mock
     private LemmaClient lemmaClient;
+
     private int count;
 
     @BeforeEach
-    void beforeEach() throws InterruptedException {
+    void beforeEach() throws InterruptedException, TranslationNotFoundException, AuthTranslateException, GettingTranslateException, LimitExceededException {
         final String[] WORDS = {"one",
                 "two",
                 "three",
@@ -52,12 +66,18 @@ class WordsHandlerTest {
                 "eleven"};
         count = random.nextInt(10) + 2;
         List<String> mockedList = new ArrayList<>(Arrays.asList(WORDS).subList(0, count));
+        System.out.println(mockedList);
         Mockito.when(wordsClient.getRandomWords(Mockito.anyInt())).thenReturn(mockedList);
-
-        Mockito.when(lemmaClient.getLemma(Mockito.any())).then(AdditionalAnswers.returnsFirstArg());
-        Mockito.when(partsOfSpeechClient.getPartsOfSpeech(Mockito.any())).thenReturn(List.of(new String[]{"noun"}));
+        Mockito.when(lemmaClient.getLemma(Mockito.anyString())).then(AdditionalAnswers.returnsFirstArg());
+        Mockito.when(partsOfSpeechClient.getPartsOfSpeech(Mockito.anyString())).thenReturn(List.of(new String[]{"noun"}));
         Mockito.when(profanityCheckerClient.isProfanity(Mockito.any())).thenReturn(false);
-        Mockito.when(translateFactory.getTranslateClient(Mockito.any())).thenReturn(new TranslateClientTestConfiguration());
+        Mockito.doAnswer(invocationOnMock -> {
+            testClientMock.translateWord(
+                    invocationOnMock.getArgument(0),
+                    invocationOnMock.getArgument(1)
+            );
+            return null;
+        }).when(translateClient).translateWord(Mockito.any(), Mockito.any());
     }
 
     @Test

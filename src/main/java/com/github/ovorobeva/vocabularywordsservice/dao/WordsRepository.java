@@ -9,6 +9,9 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository to work with {@link GeneratedWordsDto}
+ */
 @Repository
 public interface WordsRepository extends JpaRepository<GeneratedWordsDto, Integer> {
     Optional<GeneratedWordsDto> findByCode(int code);
