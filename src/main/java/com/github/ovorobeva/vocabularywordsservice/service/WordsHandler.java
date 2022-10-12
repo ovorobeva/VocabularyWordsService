@@ -40,14 +40,31 @@ public class WordsHandler {
     private final EmailSender emailSender;
 
     private final Pattern pattern = Pattern.compile("[^a-zA-Z[-]]");
-    private int defWordCount = 0;
+    private int wordsCount = 0;
+    private int lastCode = 0;
 
-    public void fillWords(List<GeneratedWordsDto> generatedWordsList,
+    public void getProcessedWords(final List<GeneratedWordsDto> generatedWordsList,
+                                  int wordsCount,
+                                  int lastCode) throws InterruptedException {
+        if (this.wordsCount == 0) {
+            this.wordsCount = wordsCount;
+        }
+        if (this.lastCode == 0) {
+            this.lastCode = lastCode;
+        }
+
+        while (generatedWordsList.size() < this.wordsCount){
+            wordsCount = this.wordsCount - generatedWordsList.size();
+            lastCode = this.lastCode;
+            processWords(generatedWordsList, wordsCount, lastCode);
+        }
+        this.wordsCount = 0;
+        this.lastCode = 0;
+    }
+
+    private void processWords(final List<GeneratedWordsDto> generatedWordsList,
                           int wordsCount,
                           int lastCode) throws InterruptedException {
-        if (defWordCount == 0) {
-            defWordCount = wordsCount;
-        }
 
         List<String> words = wordsClient.getRandomWords(wordsCount);
         List<GeneratedWordsDto> wordsToAdd = new ArrayList<>();
@@ -65,7 +82,6 @@ public class WordsHandler {
             executor.shutdown();
             while (!executor.isTerminated()) {
             }
-          //  System.out.println(wordsToAdd.toString());
         });
 
         for (GeneratedWordsDto addedWord : wordsToAdd) {
@@ -73,15 +89,10 @@ public class WordsHandler {
             lastCode++;
         }
         generatedWordsList.addAll(wordsToAdd);
-
-        if (generatedWordsList.size() < defWordCount) {
-            wordsCount = defWordCount - generatedWordsList.size();
-            fillWords(generatedWordsList, wordsCount, lastCode);
-        }
-        defWordCount = 0;
+        this.lastCode = lastCode;
     }
 
-    private Optional<GeneratedWordsDto> checkWord(String word){
+    private Optional<GeneratedWordsDto> checkWord(final String word){
             final Matcher matcher = pattern.matcher(word);
             final String lemma;
             if (matcher.find()) {
@@ -103,7 +114,7 @@ public class WordsHandler {
             return Optional.empty();
     }
 
-    private void translateWord(GeneratedWordsDto word) {
+    private void translateWord(final GeneratedWordsDto word) {
         try {
             for (Language language : Language.values()) {
                     translateClient.translateWord(word, language);
@@ -121,12 +132,11 @@ public class WordsHandler {
         }
     }
 
-    private boolean isPartOfSpeechCorrect(String word) {
+    private boolean isPartOfSpeechCorrect(final String word) {
         log.info("isPartOfSpeechCorrect: the word " + word + " is being checked");
         try {
             List<String> partsOfSpeech;
             partsOfSpeech = partsOfSpeechClient.getPartsOfSpeech(word);
-            System.out.println(partsOfSpeech);
             log.debug("isPartOfSpeechCorrect: parts of speech for the word " + word + " are: " + partsOfSpeech);
             if (partsOfSpeech == null || partsOfSpeech.isEmpty()) {
                 return false;

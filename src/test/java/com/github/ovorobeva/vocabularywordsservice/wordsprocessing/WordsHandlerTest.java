@@ -84,7 +84,7 @@ class WordsHandlerTest {
     void getProcessedWordsTest() throws InterruptedException {
         int lastCode = random.nextInt(10);
         List<GeneratedWordsDto> wordList = new ArrayList<>();
-        wordsHandler.fillWords(wordList, count, lastCode);
+        wordsHandler.getProcessedWords(wordList, count, lastCode);
         assertThat(wordList).hasSize(count);
         assertThat(wordList.get(count - 1).getCode()).isEqualTo(lastCode + count - 1);
         assertThat(wordList.get(random.nextInt(count - 1) + 1).getFr()).containsSequence("Fr");
