@@ -28,7 +28,7 @@ public class Controller {
         if (count == 0) throw new BadRequestException("Enter word count");
         log.info(count + " words were requested");
         Set<GeneratedWordsDto> generatedWordList = new HashSet<>(count);
-        wordsRetrievingService.getRandomWords(count, generatedWordList);
+        wordsRetrievingService.fetchRandomWordsFromRepository(count, generatedWordList);
         log.debug("Words are retrieved: " + generatedWordList);
         return ResponseEntity.ok().body(generatedWordList);
     }

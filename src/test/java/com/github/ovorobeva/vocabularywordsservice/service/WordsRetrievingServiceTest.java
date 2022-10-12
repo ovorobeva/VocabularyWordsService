@@ -37,7 +37,7 @@ class WordsRetrievingServiceTest {
         final Random random = new Random();
         final Set<GeneratedWordsDto> wordsToReturn = new HashSet<>();
         int count = random.nextInt(10) + 1;
-        wordsRetrievingService.getRandomWords(count, wordsToReturn);
+        wordsRetrievingService.fetchRandomWordsFromRepository(count, wordsToReturn);
         assertThat(wordsToReturn).size().isEqualTo(count);
     }
     @AfterEach

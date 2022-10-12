@@ -27,6 +27,12 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Class is supposed to process words returned from external client
+ *
+ * @author Olga Vorobeva 2020
+ */
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -43,6 +49,15 @@ public class WordsHandler {
     private int wordsCount = 0;
     private int lastCode = 0;
 
+    /**
+     * Fetches words from external API, processes them by checking on profanity and part of speech,
+     * turning them into infinitive and returnes them with translates.
+     *
+     * @param generatedWordsList callback to return
+     * @param wordsCount required number of words to fetch
+     * @param lastCode last existing code in the database
+     * @throws InterruptedException when getting random words from the external client
+     */
     public void getProcessedWords(final List<GeneratedWordsDto> generatedWordsList,
                                   int wordsCount,
                                   int lastCode) throws InterruptedException {
