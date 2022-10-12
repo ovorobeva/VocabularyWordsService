@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
@@ -35,9 +34,8 @@ class WordsRetrievingServiceTest {
     @Test
     void getRandomWordsTest() {
         final Random random = new Random();
-        final Set<GeneratedWordsDto> wordsToReturn = new HashSet<>();
         int count = random.nextInt(10) + 1;
-        wordsRetrievingService.fetchRandomWordsFromRepository(count, wordsToReturn);
+        final Set<GeneratedWordsDto> wordsToReturn = wordsRetrievingService.getRandomWords(count);
         assertThat(wordsToReturn).size().isEqualTo(count);
     }
     @AfterEach

@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Class is supposed to process words returned from external client
+ * Service is to process words returned from external client
  * and prepare them for saving into database
  *
  * @author Olga Vorobeva 2020
