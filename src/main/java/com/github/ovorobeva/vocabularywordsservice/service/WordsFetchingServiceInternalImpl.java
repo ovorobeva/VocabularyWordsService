@@ -18,7 +18,7 @@ import java.util.Set;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WordsRetrievingService {
+public class WordsFetchingServiceInternalImpl implements WordsFetchingService {
 
     private final WordsRepository wordsRepository;
     private final Random random = new Random();
@@ -30,6 +30,7 @@ public class WordsRetrievingService {
      * @param wordsCount required count of words to return
      * @return set of random words with their translates
      */
+    @Override
     public Set<GeneratedWordsDto> getRandomWords(int wordsCount) {
         final Set<GeneratedWordsDto> wordsToReturn = new HashSet<>();
         if (this.wordsCount == 0)

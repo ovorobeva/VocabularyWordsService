@@ -1,7 +1,7 @@
 package com.github.ovorobeva.vocabularywordsservice.controller;
 
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
-import com.github.ovorobeva.vocabularywordsservice.service.WordsRetrievingService;
+import com.github.ovorobeva.vocabularywordsservice.service.WordsFetchingServiceInternalImpl;
 import jakarta.ws.rs.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class Controller {
 
-    private final WordsRetrievingService wordsRetrievingService;
+    private final WordsFetchingServiceInternalImpl wordsFetchingServiceInternalImpl;
 
     @Value("${default.words.count}")
     int wordCount;
@@ -27,6 +27,6 @@ public class Controller {
     public ResponseEntity<Set<GeneratedWordsDto>> getWords(@PathVariable int count) {
         if (count == 0) throw new BadRequestException("Enter word count");
         log.info(count + " words were requested");
-        return ResponseEntity.ok().body(wordsRetrievingService.getRandomWords(count));
+        return ResponseEntity.ok().body(wordsFetchingServiceInternalImpl.getRandomWords(count));
     }
 }

@@ -9,7 +9,7 @@ import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateEx
 import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
-import com.github.ovorobeva.vocabularywordsservice.service.WordsProcessingService;
+import com.github.ovorobeva.vocabularywordsservice.service.WordsFetchingServiceExternalImpl;
 import com.github.ovorobeva.vocabularywordsservice.translates.TranslateClient;
 import com.github.ovorobeva.vocabularywordsservice.translates.testconf.TestClientMock;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,11 +31,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
-class WordsProcessingServiceTest {
+class WordsFetchingServiceExternalImplTest {
 
     private final Random random = new Random();
     @InjectMocks
-    private WordsProcessingService wordsProcessingService;
+    private WordsFetchingServiceExternalImpl wordsFetchingServiceExternalImpl;
     @Mock
     private WordsClient wordsClient;
     @Mock
@@ -84,7 +84,7 @@ class WordsProcessingServiceTest {
     void getProcessedWordsTest() throws InterruptedException {
         int lastCode = random.nextInt(10);
         List<GeneratedWordsDto> wordList = new ArrayList<>();
-        wordsProcessingService.getProcessedWords(wordList, count, lastCode);
+        wordsFetchingServiceExternalImpl.getProcessedWords(wordList, count, lastCode);
         assertThat(wordList).hasSize(count);
         assertThat(wordList.get(count - 1).getCode()).isEqualTo(lastCode + count - 1);
         assertThat(wordList.get(random.nextInt(count - 1) + 1).getFr()).containsSequence("Fr");

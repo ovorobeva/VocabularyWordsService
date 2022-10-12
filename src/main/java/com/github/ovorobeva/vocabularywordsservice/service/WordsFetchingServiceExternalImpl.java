@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WordsProcessingService {
+public class WordsFetchingServiceExternalImpl{
 
     private final WordsClient wordsClient;
     private final PartsOfSpeechClient partsOfSpeechClient;
@@ -164,5 +164,6 @@ public class WordsProcessingService {
             return false;
         }
     }
+
 }
 

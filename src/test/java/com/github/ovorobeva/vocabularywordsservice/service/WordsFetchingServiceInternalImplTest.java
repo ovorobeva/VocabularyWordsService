@@ -13,10 +13,10 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class WordsRetrievingServiceTest {
+class WordsFetchingServiceInternalImplTest {
 
     @Autowired
-    private WordsRetrievingService wordsRetrievingService;
+    private WordsFetchingServiceInternalImpl wordsFetchingServiceInternalImpl;
     @Autowired
     private WordsRepository wordsRepository;
     @Autowired
@@ -35,7 +35,7 @@ class WordsRetrievingServiceTest {
     void getRandomWordsTest() {
         final Random random = new Random();
         int count = random.nextInt(10) + 1;
-        final Set<GeneratedWordsDto> wordsToReturn = wordsRetrievingService.getRandomWords(count);
+        final Set<GeneratedWordsDto> wordsToReturn = wordsFetchingServiceInternalImpl.getRandomWords(count);
         assertThat(wordsToReturn).size().isEqualTo(count);
     }
     @AfterEach
