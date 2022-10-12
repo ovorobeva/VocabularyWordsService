@@ -19,20 +19,19 @@ public class WordsRetrievingService {
     private int defWordCount = 0;
 
     public void fetchRandomWordsFromRepository(int wordsCount, Set<GeneratedWordsDto> wordsToReturn) {
-
-    }
-
-    private void getRandomWords(int wordsCount, Set<GeneratedWordsDto> wordsToReturn) {
         if (defWordCount == 0) defWordCount = wordsCount;
-        for (byte i = 0; i < wordsCount; i++) {
-            int id = random.nextInt((int) (wordsRepository.count() - 2)) + 1;
-            wordsToReturn.add(getWord(id));
-        }
-        if (wordsToReturn.size() < defWordCount) {
+        while (wordsToReturn.size() < defWordCount) {
             wordsCount = defWordCount - wordsToReturn.size();
             getRandomWords(wordsCount, wordsToReturn);
         }
         defWordCount = 0;
+    }
+
+    private void getRandomWords(int wordsCount, Set<GeneratedWordsDto> wordsToReturn) {
+        for (byte i = 0; i < wordsCount; i++) {
+            int id = random.nextInt((int) (wordsRepository.count() - 2)) + 1;
+            wordsToReturn.add(getWord(id));
+        }
     }
 
     private GeneratedWordsDto getWord(int id) {

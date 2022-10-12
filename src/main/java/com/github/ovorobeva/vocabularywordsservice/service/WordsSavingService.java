@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 @RequiredArgsConstructor
 public class WordsSavingService {
 
-    private final WordsHandler wordsHandler;
+    private final WordsProcessingService wordsProcessingService;
     private final WordsRepository wordsRepository;
     private final EmailSender emailSender;
     private final TranslateClient translateClient;
@@ -60,7 +60,7 @@ public class WordsSavingService {
 
                 List<GeneratedWordsDto> wordList = new LinkedList<>();
                 try {
-                    wordsHandler.getProcessedWords(wordList, wordsCount, code);
+                    wordsProcessingService.getProcessedWords(wordList, wordsCount, code);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -115,7 +115,7 @@ public class WordsSavingService {
                 + "%04d elements saved", wordsCount, max, recordsCount));
         List<GeneratedWordsDto> wordList = new LinkedList<>();
         try {
-            wordsHandler.getProcessedWords(wordList, wordsCount, 0);
+            wordsProcessingService.getProcessedWords(wordList, wordsCount, 0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

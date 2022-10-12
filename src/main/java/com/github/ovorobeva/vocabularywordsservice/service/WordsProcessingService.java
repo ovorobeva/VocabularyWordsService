@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 /**
  * Class is supposed to process words returned from external client
+ * and prepare them for saving into database
  *
  * @author Olga Vorobeva 2020
  */
@@ -36,7 +37,7 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WordsHandler {
+public class WordsProcessingService {
 
     private final WordsClient wordsClient;
     private final PartsOfSpeechClient partsOfSpeechClient;
