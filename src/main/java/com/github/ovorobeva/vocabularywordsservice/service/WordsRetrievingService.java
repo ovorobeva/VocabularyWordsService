@@ -22,7 +22,7 @@ public class WordsRetrievingService {
 
     private final WordsRepository wordsRepository;
     private final Random random = new Random();
-    private int defWordCount = 0;
+    private int wordsCount = 0;
 
     /**
      * Gets random words from an internal database.
@@ -31,18 +31,19 @@ public class WordsRetrievingService {
      * @return set of random words with their translates
      */
     public Set<GeneratedWordsDto> getRandomWords(int wordsCount) {
-        Set<GeneratedWordsDto> wordsToReturn = new HashSet<>();
-        if (defWordCount == 0) defWordCount = wordsCount;
-        while (wordsToReturn.size() < defWordCount) {
-            wordsCount = defWordCount - wordsToReturn.size();
-            wordsToReturn = getMissingWords(wordsCount);
+        final Set<GeneratedWordsDto> wordsToReturn = new HashSet<>();
+        if (this.wordsCount == 0)
+            this.wordsCount = wordsCount;
+        while (wordsToReturn.size() < this.wordsCount) {
+            wordsCount = this.wordsCount - wordsToReturn.size();
+            wordsToReturn.addAll(getMissingWords(wordsCount));
         }
-        defWordCount = 0;
+        this.wordsCount = 0;
         return wordsToReturn;
     }
 
-    private Set<GeneratedWordsDto> getMissingWords(int wordsCount) {
-        Set<GeneratedWordsDto> wordsToReturn = new HashSet<>();
+    private Set<GeneratedWordsDto> getMissingWords(final int wordsCount) {
+        final Set<GeneratedWordsDto> wordsToReturn = new HashSet<>();
         for (byte i = 0; i < wordsCount; i++) {
             int code = random.nextInt((int) (wordsRepository.count() - 2)) + 1;
             wordsRepository.findByCode(code).ifPresent(wordsToReturn::add);
