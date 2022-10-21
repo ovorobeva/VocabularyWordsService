@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-@FeignClient(name = "lemma", decode404 = true, url = "https://try.expert.ai/analysis/standard/en")
+@FeignClient(name = "lemma", url = "https://try.expert.ai/analysis/standard/en")
 public interface LemmaClient extends LemmaApi {
 
     String SELDOM_WORD = "Word is not in use";

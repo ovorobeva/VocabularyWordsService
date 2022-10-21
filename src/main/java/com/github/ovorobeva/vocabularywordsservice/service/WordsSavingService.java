@@ -19,10 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -48,36 +45,31 @@ public class WordsSavingService {
      * @param wordsCount count of words to add
      */
     public synchronized void fillWordsUp(int wordsCount) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            log.debug(String.format("Starting filling database with %04d new words.", wordsCount));
-            int[] codes = wordsRepository.getCodes();
-            int recordsCount = codes.length;
-            int code;
-            int max = Arrays.stream(codes).max().isPresent() ? Arrays.stream(codes).max().getAsInt() : 0;
-            if (recordsCount == 0 || recordsCount == max) {
-                code = ++recordsCount;
+        log.debug("Starting filling database with {} new words.", wordsCount);
+        int[] codes = wordsRepository.getCodes();
+        int recordsCount = codes.length;
+        int code;
+        int max = Arrays.stream(codes).max().isPresent() ? Arrays.stream(codes).max().getAsInt() : 0;
+        if (recordsCount == 0 || recordsCount == max) {
+            code = ++recordsCount;
 
-                List<GeneratedWordsDto> wordList = new LinkedList<>();
+            Set<GeneratedWordsDto> wordSet = new HashSet<>();
+            try {
+                wordSet = wordsFetchingServiceExternalImpl.getProcessedWords(wordsCount, code);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            wordSet.forEach(generatedWords -> {
                 try {
-                    wordsFetchingServiceExternalImpl.getProcessedWords(wordList, wordsCount, code);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    wordsRepository.save(generatedWords);
+                } catch (DataIntegrityViolationException e) {
+                    notSaved++;
+                    log.error(e.getMessage());
                 }
-                wordList.forEach(generatedWords -> {
-                    try {
-                        wordsRepository.save(generatedWords);
-                    } catch (DataIntegrityViolationException e) {
-                        notSaved++;
-                        log.error(e.getMessage());
-                    }
-                });
-                wordsRepository.flush();
-            } else{
-                saveMissingWords(wordsCount, recordsCount, max, codes);}
-        });
-        executor.shutdown();
-        while (!executor.isTerminated()) {
+            });
+            wordsRepository.flush();
+        } else {
+            saveMissingWords(wordsCount, recordsCount, max, codes);
         }
     }
 
@@ -108,14 +100,14 @@ public class WordsSavingService {
     }
 
     private void saveMissingWords(int wordsCount,
-                                               int recordsCount,
-                                               int max,
-                                               int[] codes) {
+                                  int recordsCount,
+                                  int max,
+                                  int[] codes) {
         log.debug(String.format("Start to fill %04d missing words. Last code was %04d. There are "
                 + "%04d elements saved", wordsCount, max, recordsCount));
-        List<GeneratedWordsDto> wordList = new LinkedList<>();
+        Set<GeneratedWordsDto> wordList = new HashSet<>();
         try {
-            wordsFetchingServiceExternalImpl.getProcessedWords(wordList, wordsCount, 0);
+            wordList = wordsFetchingServiceExternalImpl.getProcessedWords(wordsCount, 0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -142,14 +134,16 @@ public class WordsSavingService {
             }
             end = recordsCount - 1;
         }
-
-        for (int i = 0; i < wordList.size(); i++) {
-            if (i < missingCodes.size())
-                wordList.get(i).setCode(missingCodes.get(i));
-            else wordList.get(i).setCode(++max);
+        Iterator<GeneratedWordsDto> iterator = wordList.iterator();
+        int code = 0;
+        while (iterator.hasNext()){
+            GeneratedWordsDto word = iterator.next();
+            if (code < missingCodes.size())
+                word.setCode(missingCodes.get(code));
+            else word.setCode(++max);
+            code++;
         }
         wordList.forEach(generatedWords -> {
-            System.out.println("777777777");
             if (wordsRepository.findByCode(generatedWords.getCode()).isEmpty())
                 try {
                     wordsRepository.save(generatedWords);

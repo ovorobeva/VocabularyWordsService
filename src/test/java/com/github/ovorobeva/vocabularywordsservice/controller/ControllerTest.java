@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,8 +32,13 @@ class ControllerTest {
 
     @BeforeEach
     void before() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
         if (wordsRepository.count() < 20)
-            wordsSavingService.fillWordsUp(20);
+            wordsSavingService.fillWordsUp(20);});
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+        }
     }
 
     @Test

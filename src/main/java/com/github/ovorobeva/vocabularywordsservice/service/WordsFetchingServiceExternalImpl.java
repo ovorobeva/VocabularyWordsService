@@ -18,12 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,14 +49,13 @@ public class WordsFetchingServiceExternalImpl{
      * Fetches words from external API, processes them by checking on profanity and part of speech,
      * turning them into infinitive and returnes them with translates.
      *
-     * @param generatedWordsList callback to return
      * @param wordsCount required number of words to fetch
      * @param lastCode last existing code in the database
      * @throws InterruptedException when getting random words from the external client
      */
-    public void getProcessedWords(final List<GeneratedWordsDto> generatedWordsList,
-                                  int wordsCount,
-                                  int lastCode) throws InterruptedException {
+    public Set<GeneratedWordsDto> getProcessedWords(int wordsCount, int lastCode)
+            throws InterruptedException {
+        final Set<GeneratedWordsDto> generatedWordsSet = new HashSet<>();
         if (this.wordsCount == 0) {
             this.wordsCount = wordsCount;
         }
@@ -69,43 +63,35 @@ public class WordsFetchingServiceExternalImpl{
             this.lastCode = lastCode;
         }
 
-        while (generatedWordsList.size() < this.wordsCount){
-            wordsCount = this.wordsCount - generatedWordsList.size();
+        while (generatedWordsSet.size() < this.wordsCount){
+            wordsCount = this.wordsCount - generatedWordsSet.size();
             lastCode = this.lastCode;
-            processWords(generatedWordsList, wordsCount, lastCode);
+            generatedWordsSet.addAll(processWords(wordsCount, lastCode));
         }
         this.wordsCount = 0;
         this.lastCode = 0;
+        return generatedWordsSet;
     }
 
-    private void processWords(final List<GeneratedWordsDto> generatedWordsList,
-                          int wordsCount,
-                          int lastCode) throws InterruptedException {
-
-        List<String> words = wordsClient.getRandomWords(wordsCount);
+    private Set<GeneratedWordsDto> processWords(int wordsCount,
+                                                int lastCode) throws InterruptedException {
+        final Set<GeneratedWordsDto> generatedWordsList = new HashSet<>();
+        Set<String> words = wordsClient.getRandomWords(wordsCount);
         List<GeneratedWordsDto> wordsToAdd = new ArrayList<>();
 
         log.debug("getWords: Starting removing non-matching words from the list \n" + words);
 
-        List<ExecutorService> executors = new ArrayList<>();
-        words.forEach(word -> {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executors.add(executor);
-            executor.execute(() -> checkWord(word).ifPresent(wordsToAdd::add));
-        });
+        words.parallelStream().forEach(word -> checkWord(word).ifPresent(wordsToAdd::add));
 
-        executors.forEach(executor -> {
-            executor.shutdown();
-            while (!executor.isTerminated()) {
+        if (!wordsToAdd.isEmpty()) {
+            for (GeneratedWordsDto addedWord : wordsToAdd) {
+                addedWord.setCode(lastCode);
+                lastCode++;
             }
-        });
-
-        for (GeneratedWordsDto addedWord : wordsToAdd) {
-            addedWord.setCode(lastCode);
-            lastCode++;
+            generatedWordsList.addAll(wordsToAdd);
+            this.lastCode = lastCode;
         }
-        generatedWordsList.addAll(wordsToAdd);
-        this.lastCode = lastCode;
+        return generatedWordsList;
     }
 
     private Optional<GeneratedWordsDto> checkWord(final String word){

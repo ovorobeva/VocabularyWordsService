@@ -10,10 +10,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @FeignClient(name = "random-words", decode404 = true, url = "https://api.wordnik.com/v4/words.json/")
@@ -28,11 +25,11 @@ public interface WordsClient extends WordsApi {
     String MIN_LENGTH = "2";
     String MAX_LENGTH = "-1";
 
-    default List<String> getRandomWords(int wordsCount) throws InterruptedException {
+    default Set<String> getRandomWords(int wordsCount) throws InterruptedException {
 
         final String WORDS_API_KEY = getenv.get("WORDS_API_KEY");
         int returnedWords = 0;
-        List<String> words = new LinkedList<>();
+        Set<String> words = new HashSet<>();
 
         List<String> includePartOfSpeechList = new ArrayList<>();
         for (IncludedPartsOfSpeech partsOfSpeech : IncludedPartsOfSpeech.values()) {
