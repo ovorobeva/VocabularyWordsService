@@ -14,14 +14,14 @@ class ProfanityCheckerClientTest {
 
     @Test
     void isProfanityTestTrue() {
-        assertThat(profanityCheckerClient.isProfanity("shit")).isTrue();
+        assertThat(profanityCheckerClient.isProfanity("shit").getBody()).isEqualTo("true");
     }
     @Test
     void isProfanityTestFalse() {
-        assertThat(profanityCheckerClient.isProfanity("word")).isFalse();
+        assertThat(profanityCheckerClient.isProfanity("word").getBody()).isEqualTo("false");
     }
     @Test
     void isProfanityTestNonExists() {
-        assertThat(profanityCheckerClient.isProfanity("non existing word")).isFalse();
+        assertThat(profanityCheckerClient.isProfanity("non existing word").getBody()).isEqualTo("false");
     }
 }

@@ -1,7 +1,8 @@
 package com.github.ovorobeva.vocabularywordsservice.service;
 
-import com.github.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.repositories.WordsRepository;
+import com.github.ovorobeva.vocabularywordsservice.service.impl.WordsSavingServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +17,13 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class WordsSavingServiceTest {
+class WordsSavingServiceImplTest {
 
     private final Random random = new Random();
     @Autowired
     private WordsRepository wordsRepository;
     @Autowired
-    private WordsSavingService wordsSavingService;
+    private WordsSavingServiceImpl wordsSavingServiceImpl;
 
     @Value("${default.words.count}")
     int defaultWordCount;
@@ -30,7 +31,7 @@ class WordsSavingServiceTest {
     @BeforeEach
     void before() {
         if (wordsRepository.count() < defaultWordCount)
-            wordsSavingService.fillWordsUp(defaultWordCount);
+            wordsSavingServiceImpl.fillWordsUp(defaultWordCount);
     }
 
 
@@ -40,7 +41,7 @@ class WordsSavingServiceTest {
         wordsRepository.deleteByCode(randomCode);
         assertThat(wordsRepository.getByCode(randomCode)).isNull();
         ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.execute(() -> wordsSavingService.fillWordsUp(random.nextInt(5) + 1));
+        executor.execute(() -> wordsSavingServiceImpl.fillWordsUp(random.nextInt(5) + 1));
         executor.shutdown();
         while (!executor.isTerminated()) {
         }
@@ -56,7 +57,7 @@ class WordsSavingServiceTest {
         wordsRepository.saveAndFlush(word);
 
         ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.execute(() -> wordsSavingService.fillMissingTranslates());
+        executor.execute(() -> wordsSavingServiceImpl.fillMissingTranslates());
         executor.shutdown();
         Thread.sleep(10000);
         assertThat(wordsRepository.getByCode(randomCode).getFr()).isEqualTo(currentTranslationFr);

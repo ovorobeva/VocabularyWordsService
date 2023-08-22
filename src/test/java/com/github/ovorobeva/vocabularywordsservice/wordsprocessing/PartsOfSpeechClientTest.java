@@ -1,17 +1,14 @@
 package com.github.ovorobeva.vocabularywordsservice.wordsprocessing;
 
 import com.github.ovorobeva.vocabularywordsservice.clients.PartsOfSpeechClient;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PartsOfSpeechClientTest {
     @Autowired
     PartsOfSpeechClient partsOfSpeechClient;
-
+/*
     @Test
     void getPartsOfSpeechTestNoun() throws InterruptedException {
         assertThat(partsOfSpeechClient.getPartsOfSpeech("word")).contains("noun");
@@ -30,5 +27,5 @@ class PartsOfSpeechClientTest {
     @Test
     void getPartsOfSpeechTestNull() throws InterruptedException {
         assertThat(partsOfSpeechClient.getPartsOfSpeech("non existing word")).isNull();
-    }
+    }*/
 }

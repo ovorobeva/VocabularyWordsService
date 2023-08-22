@@ -1,7 +1,8 @@
-package com.github.ovorobeva.vocabularywordsservice.service;
+package com.github.ovorobeva.vocabularywordsservice.service.impl;
 
-import com.github.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.repositories.WordsRepository;
+import com.github.ovorobeva.vocabularywordsservice.service.WordsFetchingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

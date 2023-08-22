@@ -1,7 +1,9 @@
 package com.github.ovorobeva.vocabularywordsservice.service;
 
-import com.github.ovorobeva.vocabularywordsservice.dao.WordsRepository;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.repositories.WordsRepository;
+import com.github.ovorobeva.vocabularywordsservice.service.impl.WordsFetchingServiceInternalImpl;
+import com.github.ovorobeva.vocabularywordsservice.service.impl.WordsSavingServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,12 +22,12 @@ class WordsFetchingServiceInternalImplTest {
     @Autowired
     private WordsRepository wordsRepository;
     @Autowired
-    private WordsSavingService wordsSavingService;
+    private WordsSavingServiceImpl wordsSavingServiceImpl;
 
     @BeforeEach
     void before() {
         if (wordsRepository.count() < 20)
-            wordsSavingService.fillWordsUp(20);
+            wordsSavingServiceImpl.fillWordsUp(20);
         for (int i = 0; i <= 8; i += 2){
             wordsRepository.deleteByCode(i);
         }

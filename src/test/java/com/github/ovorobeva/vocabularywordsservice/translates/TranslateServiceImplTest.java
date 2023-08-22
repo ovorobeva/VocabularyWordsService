@@ -5,6 +5,7 @@ import com.github.ovorobeva.vocabularywordsservice.exceptions.GettingTranslateEx
 import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededException;
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.service.TranslateService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,10 +15,10 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class TranslateClientTest {
+class TranslateServiceImplTest {
 
     @Autowired
-    private TranslateClient translateClient;
+    private TranslateService translateService;
 
     @Test
     void translateWordTestRu() throws AuthTranslateException, GettingTranslateException, LimitExceededException, IOException, InterruptedException, TranslationNotFoundException {
@@ -25,9 +26,7 @@ class TranslateClientTest {
         assertThat(word.getRu()).isNull();
         assertThat(word.getFr()).isNull();
         assertThat(word.getCz()).isNull();
-        translateClient.translateWord(word, Language.RU);
-        translateClient.translateWord(word, Language.FR);
-        translateClient.translateWord(word, Language.CZ);
+        translateService.translateWord(word);
         assertThat(word.getRu()).isEqualTo("слово");
         assertThat(word.getCz()).isEqualTo("slovo");
         assertThat(word.getFr()).isEqualTo("mot");

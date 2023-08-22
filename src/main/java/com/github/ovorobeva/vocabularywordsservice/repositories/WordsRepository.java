@@ -1,4 +1,4 @@
-package com.github.ovorobeva.vocabularywordsservice.dao;
+package com.github.ovorobeva.vocabularywordsservice.repositories;
 
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import org.springframework.data.jpa.repository.JpaRepository;
