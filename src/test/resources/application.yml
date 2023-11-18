@@ -1,0 +1,54 @@
+spring:
+  datasource:
+    url: 'jdbc:postgresql://localhost:5433/vws_postgres14?useUnicode=true&serverTimezone=CET'
+    username: test
+    password: test
+    driver-class-name: org.postgresql.Driver
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+  # Show or not log for each sql query
+  jpa:
+    show-sql: true
+    # Hibernate ddl auto (create, create-drop, update): with "update" the database
+    # schema will be automatically updated accordingly to java entities found in
+    # the project
+    hibernate:
+      ddl-auto: update
+   #   use-new-id-generator-mappings: true
+
+# Allows Hibernate to generate SQL optimized for a particular DBMS
+    database: postgresql
+    main:
+      allow-bean-definition-overriding: true
+    generate-ddl: true
+    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+
+  #spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL95Dialect
+#Gmail properties
+  mail:
+    host: localhost
+    port: 3025
+    username: passant.dlm@gmail.com
+    password: hazxergxtbhftgdc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+words:
+  defaultWordCount: 5
+  wordsApiKey: 55k0ykdy6pe8fmu69pwjk94es02i9085k3h1hn11ku56c4qep
+  translationApiKey: '6c7b1dbe-c308-3d45-dd62-81fe723d988d:fx'
+
+
+logging:
+  config: 'src/main/resources/log4j2.xml'
+
+feign:
+  client:
+    config:
+      parts-of-speech:
+        loggerLevel: FULL

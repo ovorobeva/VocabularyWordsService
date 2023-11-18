@@ -1,30 +1,29 @@
 package com.github.ovorobeva.vocabularywordsservice.model.generated;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.test.annotation.DirtiesContext;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
+import java.util.UUID;
 
-@Getter
 @Setter
+@Getter
 @RequiredArgsConstructor
 @Entity
-@Table(name = "Generated_words", uniqueConstraints = @UniqueConstraint(columnNames={"English", "Code"}))
+@Table(name = "generated_words", uniqueConstraints = @UniqueConstraint(columnNames={"English", "Code"}))
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class GeneratedWordsDto {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private UUID id;
 
-    @Column (name = "Code")
-    @UniqueElements
+    @Column (name = "Code", unique = true)
     @NotNull(message = "Code cannot be null")
-    private int code;
+    private Integer code;
 
     @Column (name = "English")
     @NotNull(message = "English translation cannot be null")
@@ -42,7 +41,7 @@ public class GeneratedWordsDto {
     @NotNull(message = "Czech translation cannot be null")
     private String cz;
 
-    public GeneratedWordsDto(String en, int code) {
+    public GeneratedWordsDto(String en, Integer code) {
         this.en = en.toLowerCase();
         this.code = code;
     }

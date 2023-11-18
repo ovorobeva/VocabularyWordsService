@@ -1,7 +1,7 @@
 package com.github.ovorobeva.vocabularywordsservice.emailsender;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,12 +12,13 @@ import java.util.Arrays;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class EmailSender {
+
     @Value("${spring.mail.username}")
     public String TO;
 
-    @Autowired
-    private JavaMailSenderImpl emailSender;
+    private final JavaMailSenderImpl emailSender;
 
     public void sendSimpleMessage(String subject, String text) throws MailSendException {
         SimpleMailMessage message = new SimpleMailMessage();
