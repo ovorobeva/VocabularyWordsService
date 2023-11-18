@@ -8,14 +8,13 @@ import com.github.ovorobeva.vocabularywordsservice.exceptions.LimitExceededExcep
 import com.github.ovorobeva.vocabularywordsservice.exceptions.TranslationNotFoundException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.model.translate.TranslateDto;
+import com.github.ovorobeva.vocabularywordsservice.properties.WordsProperties;
 import com.github.ovorobeva.vocabularywordsservice.service.TranslateService;
 import com.github.ovorobeva.vocabularywordsservice.translates.Language;
 import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
@@ -27,10 +26,7 @@ public class TranslateServiceImpl implements TranslateService {
 
     private final TranslateClient translateClient;
     private final EmailSender emailSender;
-
-    @NonFinal
-    @Value("${translation.api.key:}") //todo: to create file properties
-    private String API_KEY;
+    private final WordsProperties wordsProperties;
 
     public void translateWord(final GeneratedWordsDto word) {
         try {
@@ -58,7 +54,7 @@ public class TranslateServiceImpl implements TranslateService {
             TranslationNotFoundException {
         try {
             final ResponseEntity<TranslateDto> response = translateClient.getTranslate(word.getEn(),
-                    API_KEY,
+                    wordsProperties.getTranslationApiKey(),
                     Language.EN.getValue(),
                     targetLanguage.getValue());
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {

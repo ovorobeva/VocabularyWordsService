@@ -1,19 +1,19 @@
 package com.github.ovorobeva.vocabularywordsservice.service.impl;
 
-import com.github.ovorobeva.vocabularywordsservice.emailsender.EmailSender;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.properties.WordsProperties;
 import com.github.ovorobeva.vocabularywordsservice.repositories.WordsRepository;
 import com.github.ovorobeva.vocabularywordsservice.service.TranslateService;
+import com.github.ovorobeva.vocabularywordsservice.service.WordsFetchingServiceExternal;
 import com.github.ovorobeva.vocabularywordsservice.service.WordsSavingService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,13 +24,11 @@ import java.util.concurrent.Executors;
 @RequiredArgsConstructor
 public class WordsSavingServiceImpl implements WordsSavingService {
 
-    private final WordsFetchingServiceExternalImpl wordsFetchingServiceExternalImpl;
+    private final WordsFetchingServiceExternal wordsFetchingServiceExternalImpl;
     private final WordsRepository wordsRepository;
-    private final EmailSender emailSender;
     private final TranslateService translateService;
+    private final WordsProperties wordsProperties;
 
-    @Value("${default.words.count}")
-    int defaultWordCount;
     int notSaved = 0;
 
     public synchronized void fillWordsUp(int wordsCount) {
@@ -42,12 +40,8 @@ public class WordsSavingServiceImpl implements WordsSavingService {
         if (recordsCount == 0 || recordsCount == max) {
             code = ++recordsCount;
 
-            Set<GeneratedWordsDto> wordSet = new HashSet<>();
-            try {
-                wordSet = wordsFetchingServiceExternalImpl.getProcessedWords(wordsCount, code);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Set<GeneratedWordsDto> wordSet;
+            wordSet = wordsFetchingServiceExternalImpl.getProcessedWords(wordsCount, code);
             wordSet.forEach(generatedWords -> {
                 try {
                     wordsRepository.save(generatedWords);
@@ -81,11 +75,7 @@ public class WordsSavingServiceImpl implements WordsSavingService {
         log.debug(String.format("Start to fill %04d missing words. Last code was %04d. There are "
                 + "%04d elements saved", wordsCount, max, recordsCount));
         Set<GeneratedWordsDto> wordList = new HashSet<>();
-        try {
-            wordList = wordsFetchingServiceExternalImpl.getProcessedWords(wordsCount, 0);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        wordList = wordsFetchingServiceExternalImpl.getProcessedWords(wordsCount, 0);
 
         int start = 0;
         int end = recordsCount - 1;
@@ -135,8 +125,8 @@ public class WordsSavingServiceImpl implements WordsSavingService {
     private synchronized void defaultFillUp() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
-            log.debug("filling " + defaultWordCount + " more words");
-            fillWordsUp(defaultWordCount);
+            log.debug("filling " + wordsProperties.getDefaultWordCount() + " more words");
+            fillWordsUp(wordsProperties.getDefaultWordCount());
         });
     }
 

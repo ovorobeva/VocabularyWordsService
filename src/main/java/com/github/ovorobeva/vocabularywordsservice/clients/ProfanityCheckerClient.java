@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "profanity-checker", decode404 = true, url = "https://www.purgomalum.com/service/")
+@FeignClient(name = "profanity-checker", dismiss404 = true, url = "https://www.purgomalum.com/service/")
 public interface ProfanityCheckerClient {
     @RequestMapping(
             value = {"/containsprofanity/"},

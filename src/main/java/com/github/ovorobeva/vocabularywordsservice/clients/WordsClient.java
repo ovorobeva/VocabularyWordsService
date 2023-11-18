@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "random-words", decode404 = true, url = "https://api.wordnik.com/v4/words.json/")
+@FeignClient(name = "random-words", dismiss404 = true, url = "https://api.wordnik.com/v4/words.json/")
 public interface WordsClient {
 
     @RequestMapping(
@@ -24,7 +24,7 @@ public interface WordsClient {
                                                   @RequestParam("maxLength") String maxLength,
                                                   @RequestParam("includePartOfSpeech[]") List<String> includePartOfSpeech,
                                                   @RequestParam("excludePartOfSpeech[]") List<String> excludePartOfSpeechList,
-                                                  @RequestParam("limit") int wordsCount,
+                                                  @RequestParam("limit") Integer wordsCount,
                                                   @RequestParam("api_key") String api_key);
 
 }

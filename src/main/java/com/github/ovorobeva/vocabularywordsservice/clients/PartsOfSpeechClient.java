@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
-@FeignClient(name = "parts-of-speech", decode404 = true, url = "https://api.dictionaryapi.dev/api/v2/entries/")
+@FeignClient(name = "parts-of-speech", dismiss404 = true, url = "https://api.dictionaryapi.dev/api/v2/entries/")
 public interface PartsOfSpeechClient {
     @RequestMapping(
             value = {"/en/{word}"},

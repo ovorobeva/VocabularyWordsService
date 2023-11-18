@@ -1,9 +1,7 @@
-package com.github.ovorobeva.vocabularywordsservice.service;
+package com.github.ovorobeva.vocabularywordsservice.service.impl;
 
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.repositories.WordsRepository;
-import com.github.ovorobeva.vocabularywordsservice.service.impl.WordsFetchingServiceInternalImpl;
-import com.github.ovorobeva.vocabularywordsservice.service.impl.WordsSavingServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -33,6 +33,7 @@ public class WordsFetchingServiceInternalImpl implements WordsFetchingService {
      */
     @Override
     public Set<GeneratedWordsDto> getRandomWords(int wordsCount) {
+        log.debug("{} words were requested", wordsCount);
         final Set<GeneratedWordsDto> wordsToReturn = new HashSet<>();
         if (this.wordsCount == 0)
             this.wordsCount = wordsCount;

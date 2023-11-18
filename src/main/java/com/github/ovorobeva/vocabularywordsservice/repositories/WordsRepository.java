@@ -4,16 +4,17 @@ import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWord
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository to work with {@link GeneratedWordsDto}
  */
 @Repository
-public interface WordsRepository extends JpaRepository<GeneratedWordsDto, Integer> {
+public interface WordsRepository extends JpaRepository<GeneratedWordsDto, UUID> {
     Optional<GeneratedWordsDto> findByCode(int code);
 
     @Query("SELECT code FROM GeneratedWordsDto ORDER BY code")

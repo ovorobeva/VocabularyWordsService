@@ -5,7 +5,6 @@ import com.github.ovorobeva.vocabularywordsservice.model.partsofspeech.PartsOfSp
 import com.github.ovorobeva.vocabularywordsservice.service.PartsOfSpeechService;
 import feign.codec.DecodeException;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +13,13 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedList;
 import java.util.List;
 
-@Value
 @Service
 @NonFinal
 @RequiredArgsConstructor
 @Slf4j
 public class PartsOfSpeechServiceImpl implements PartsOfSpeechService {
 
-    PartsOfSpeechClient partsOfSpeechClient;
+    final private PartsOfSpeechClient partsOfSpeechClient;
 
     public List<String> getPartsOfSpeech(final String word) {
         try {
@@ -33,7 +31,7 @@ public class PartsOfSpeechServiceImpl implements PartsOfSpeechService {
             } else {
                 return null;
             }
-        } catch (IllegalStateException | DecodeException e) {
+        } catch (DecodeException e) {
             log.error("Failed to get part of speech for the word {}", word);
             e.printStackTrace();
             return null;

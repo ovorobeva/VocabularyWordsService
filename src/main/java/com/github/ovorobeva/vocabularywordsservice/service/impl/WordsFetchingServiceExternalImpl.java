@@ -6,12 +6,14 @@ import com.github.ovorobeva.vocabularywordsservice.clients.WordsClient;
 import com.github.ovorobeva.vocabularywordsservice.enums.CorrectPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.enums.ExcludedPartsOfSpeech;
 import com.github.ovorobeva.vocabularywordsservice.enums.IncludedPartsOfSpeech;
-import com.github.ovorobeva.vocabularywordsservice.exceptions.TooManyRequestsException;
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
 import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaDto;
 import com.github.ovorobeva.vocabularywordsservice.model.lemmas.LemmaRequest;
 import com.github.ovorobeva.vocabularywordsservice.model.words.RandomWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.properties.WordsProperties;
 import com.github.ovorobeva.vocabularywordsservice.service.PartsOfSpeechService;
+import com.github.ovorobeva.vocabularywordsservice.service.TranslateService;
+import com.github.ovorobeva.vocabularywordsservice.service.WordsFetchingServiceExternal;
 import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,30 +39,23 @@ import static com.github.ovorobeva.vocabularywordsservice.consrtants.Constants.*
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class WordsFetchingServiceExternalImpl{
+public class WordsFetchingServiceExternalImpl implements WordsFetchingServiceExternal {
 
     final String SELDOM_WORD = "Word is not in use";
 
     private final WordsClient wordsClient;
     private final PartsOfSpeechService partsOfSpeechService;
-    private final TranslateServiceImpl translateServiceImpl;
+    private final TranslateService translateServiceImpl;
     private final ProfanityCheckerClient profanityCheckerClient;
     private final LemmaClient lemmaClient;
+    private final WordsProperties wordsProperties;
 
     private final Pattern pattern = Pattern.compile("[^a-zA-Z[-]]");
-    private int wordsCount = 0;
-    private int lastCode = 0;
+    private Integer wordsCount = 0;
+    private Integer lastCode = 0;
 
-    /**
-     * Fetches words from external API, processes them by checking on profanity and part of speech,
-     * turning them into infinitive and returnes them with translates.
-     *
-     * @param wordsCount required number of words to fetch
-     * @param lastCode last existing code in the database
-     * @throws InterruptedException when getting random words from the external client
-     */
-    public Set<GeneratedWordsDto> getProcessedWords(int wordsCount, int lastCode)
-            throws InterruptedException {
+    @Override
+    public Set<GeneratedWordsDto> getProcessedWords(Integer wordsCount, Integer lastCode) {
         final Set<GeneratedWordsDto> generatedWordsSet = new HashSet<>();
         if (this.wordsCount == 0) {
             this.wordsCount = wordsCount;
@@ -68,17 +64,18 @@ public class WordsFetchingServiceExternalImpl{
             this.lastCode = lastCode;
         }
 
-        while (generatedWordsSet.size() < this.wordsCount){
+        while (generatedWordsSet.size() < this.wordsCount) {
             wordsCount = this.wordsCount - generatedWordsSet.size();
             lastCode = this.lastCode;
-            generatedWordsSet.addAll(processWords(wordsCount, lastCode));
+            generatedWordsSet.addAll(processWords(wordsCount, new AtomicInteger(lastCode)));
         }
+
         this.wordsCount = 0;
         this.lastCode = 0;
         return generatedWordsSet;
     }
 
-    public Set<String> getRandomWords(final int wordsCount) throws InterruptedException {
+    private Set<String> getRandomWords(final Integer wordsCount) {
         int returnedWords = 0;
         final Set<String> words = new HashSet<>();
 
@@ -102,7 +99,7 @@ public class WordsFetchingServiceExternalImpl{
                     includePartOfSpeechList,
                     excludePartOfSpeechList,
                     wordsCount,
-                    WORDS_API_KEY
+                    wordsProperties.getWordsApiKey()
             );
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 response.getBody().forEach(word -> words.add(word.getWord()));
@@ -113,7 +110,11 @@ public class WordsFetchingServiceExternalImpl{
         } catch (RetryableException e) {
             e.printStackTrace();
             if (e.getCause() instanceof FeignException.TooManyRequests) {
-                Thread.sleep(10000);
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
                 if ((wordsCount - returnedWords) > 0)
                     return getRandomWords(wordsCount - returnedWords);
             }
@@ -121,47 +122,44 @@ public class WordsFetchingServiceExternalImpl{
         return words;
     }
 
-    private Set<GeneratedWordsDto> processWords(int wordsCount,
-                                                int lastCode) throws InterruptedException {
-        final Set<GeneratedWordsDto> generatedWordsList = new HashSet<>();
-        Set<String> words = getRandomWords(wordsCount);
-        List<GeneratedWordsDto> wordsToAdd = new ArrayList<>();
+    private Set<GeneratedWordsDto> processWords(Integer wordsCount,
+                                                AtomicInteger lastCode) {
+        final Set<String> words = getRandomWords(wordsCount);
+        final Set<GeneratedWordsDto> wordsToAdd = new HashSet<>();
 
         log.debug("getWords: Starting removing non-matching words from the list \n" + words);
 
         words.parallelStream().forEach(word -> checkWord(word).ifPresent(wordsToAdd::add));
 
         if (!wordsToAdd.isEmpty()) {
-            for (GeneratedWordsDto addedWord : wordsToAdd) {
-                addedWord.setCode(lastCode);
-                lastCode++;
-            }
-            generatedWordsList.addAll(wordsToAdd);
-            this.lastCode = lastCode;
+            wordsToAdd.forEach(addedWord -> addedWord.setCode(lastCode.getAndIncrement()));
+            this.lastCode = lastCode.get();
         }
-        return generatedWordsList;
+        return wordsToAdd;
     }
 
-    private Optional<GeneratedWordsDto> checkWord(final String word){
-            final Matcher matcher = pattern.matcher(word);
-            final String lemma;
-            if (matcher.find()) {
-                log.info("getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
-            } else {
-                lemma = getLemma(word);
-                if (lemma.equals(SELDOM_WORD)) {
-                    log.info("getWords: Removing the word " + lemma + " because of its never using.");
-                } else if (!isPartOfSpeechCorrect(lemma)) {
-                    log.info("getWords: Removing the word " + lemma + " because of the wrong part of speech.");
-                } else if (isProfanity(lemma)) {
-                    log.info("getWords: Removing the word " + lemma + " because of profanity.");
-                } else {
-                    GeneratedWordsDto generatedWord = new GeneratedWordsDto(lemma, 0);
-                    translateServiceImpl.translateWord(generatedWord);
-                    return Optional.of(generatedWord);
-                }
-            }
-            return Optional.empty();
+    private Optional<GeneratedWordsDto> checkWord(final String word) {
+        final Matcher matcher = pattern.matcher(word);
+
+        if (matcher.find()) {
+            log.info("getWords: Removing the word " + word + " because of containing symbol " + matcher.toMatchResult());
+        }
+
+        final String lemma = getLemma(word);
+
+        if (lemma.equals(SELDOM_WORD)) {
+            log.info("getWords: Removing the word " + lemma + " because of its never using.");
+        } else if (!isPartOfSpeechCorrect(lemma)) {
+            log.info("getWords: Removing the word " + lemma + " because of the wrong part of speech.");
+        } else if (isProfanity(lemma)) {
+            log.info("getWords: Removing the word " + lemma + " because of profanity.");
+        } else {
+            GeneratedWordsDto generatedWord = new GeneratedWordsDto(lemma, 0);
+            translateServiceImpl.translateWord(generatedWord);
+            return Optional.of(generatedWord);
+        }
+
+        return Optional.empty();
     }
 
     private boolean isPartOfSpeechCorrect(final String word) {
@@ -207,11 +205,11 @@ public class WordsFetchingServiceExternalImpl{
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 return response.getBody().equals("true");
             } else if (response.getStatusCode().equals(HttpStatus.METHOD_NOT_ALLOWED)) {
-                throw new TooManyRequestsException();
+                throw new IllegalStateException();
             } else {
                 return false;
             }
-        } catch (IllegalStateException | TooManyRequestsException e) {
+        } catch (IllegalStateException e) {
             e.printStackTrace();
             return false;
         }

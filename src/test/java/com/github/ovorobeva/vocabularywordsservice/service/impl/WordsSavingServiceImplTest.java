@@ -1,13 +1,13 @@
-package com.github.ovorobeva.vocabularywordsservice.service;
+package com.github.ovorobeva.vocabularywordsservice.service.impl;
 
 import com.github.ovorobeva.vocabularywordsservice.model.generated.GeneratedWordsDto;
+import com.github.ovorobeva.vocabularywordsservice.properties.WordsProperties;
 import com.github.ovorobeva.vocabularywordsservice.repositories.WordsRepository;
-import com.github.ovorobeva.vocabularywordsservice.service.impl.WordsSavingServiceImpl;
+import com.github.ovorobeva.vocabularywordsservice.service.WordsSavingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Random;
@@ -20,18 +20,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WordsSavingServiceImplTest {
 
     private final Random random = new Random();
+
     @Autowired
     private WordsRepository wordsRepository;
-    @Autowired
-    private WordsSavingServiceImpl wordsSavingServiceImpl;
 
-    @Value("${default.words.count}")
-    int defaultWordCount;
+    @Autowired
+    private WordsSavingService wordsSavingService;
+
+    @Autowired
+    private WordsProperties wordsProperties;
 
     @BeforeEach
     void before() {
-        if (wordsRepository.count() < defaultWordCount)
-            wordsSavingServiceImpl.fillWordsUp(defaultWordCount);
+        if (wordsRepository.count() < wordsProperties.getDefaultWordCount())
+            wordsSavingService.fillWordsUp(wordsProperties.getDefaultWordCount());
     }
 
 
@@ -41,7 +43,7 @@ class WordsSavingServiceImplTest {
         wordsRepository.deleteByCode(randomCode);
         assertThat(wordsRepository.getByCode(randomCode)).isNull();
         ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.execute(() -> wordsSavingServiceImpl.fillWordsUp(random.nextInt(5) + 1));
+        executor.execute(() -> wordsSavingService.fillWordsUp(random.nextInt(5) + 1));
         executor.shutdown();
         while (!executor.isTerminated()) {
         }
@@ -57,7 +59,7 @@ class WordsSavingServiceImplTest {
         wordsRepository.saveAndFlush(word);
 
         ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.execute(() -> wordsSavingServiceImpl.fillMissingTranslates());
+        executor.execute(() -> wordsSavingService.fillMissingTranslates());
         executor.shutdown();
         Thread.sleep(10000);
         assertThat(wordsRepository.getByCode(randomCode).getFr()).isEqualTo(currentTranslationFr);
